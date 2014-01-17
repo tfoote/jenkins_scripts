@@ -8,6 +8,22 @@ import shutil
 from common import get_ros_env, call, check_output, BuildException
 from doc_stack import document_necessary, document_repo
 
+#TODO: Eventually, pull rosdoc lite from debs
+def checkout_rosdoc_lite(workspace, ros_distro, no_chroot=False):
+    checkout_path = "%s/rosdoc_lite" % workspace
+    if os.path.exists(checkout_path):
+        shutil.rmtree(checkout_path)
+
+    call("git clone git://github.com/ros-infrastructure/rosdoc_lite.git %s" % checkout_path)
+    old_dir = os.getcwd()
+    os.chdir(checkout_path)
+    special_branch = {'fuerte': 'fuerte-devel'}
+    if ros_distro in special_branch:
+        call("git checkout %s" % special_branch[ros_distro])
+    rev = check_output("git rev-parse HEAD").split('\n')[0]
+    os.chdir(old_dir)
+    return rev
+
 def get_jenkins_scripts_version(workspace, no_chroot=False):
     if not no_chroot:
         old_dir = os.getcwd()

@@ -22,5 +22,5 @@ RUN rosdep update
 
 RUN git clone --depth=1 -b docker https://github.com/esteve/jenkins_scripts.git /tmp/jenkins_scripts
 
-CMD ["python", "/tmp/jenkins_scripts/generate_documentation.py", "--platform", "quantal", "--arch", "i386", "--workspace", "/tmp", "abb"]
+CMD ["python", "/tmp/jenkins_scripts/generate_documentation.py", "--platform", "quantal", "--arch", "i386", "--workspace", "/tmp", "groovy", "abb"]
 
