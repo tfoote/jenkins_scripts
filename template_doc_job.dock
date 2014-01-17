@@ -1,4 +1,4 @@
-FROM $base
+FROM $operating_system:$platform
 MAINTAINER $maintainer_name $maintainer_email
 
 RUN echo deb http://archive.ubuntu.com/ubuntu precise main universe multiverse | tee /etc/apt/sources.list
@@ -9,6 +9,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -q -y wget net-tools python p
 RUN wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -
 RUN wget -q -O - http://packages.ros.org/ros.key | apt-key add -
 RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -q -y apt-utils
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -q -y pkg-config lsb-release
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -q -y mercurial
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -q -y git
@@ -19,12 +20,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -q -y graphviz python-sphinx 
 RUN rosdep init
 RUN rosdep update
 
-ADD message_generation.py /tmp/message_generation.py
-ADD repo_structure.py /tmp/repo_structure.py
-ADD doc_manifest.py /tmp/doc_manifest.py
-ADD tags_db.py /tmp/tags_db.py
-ADD rosdep.py /tmp/rosdep.py
-ADD common.py /tmp/common.py
-ADD generate_documentation.py /tmp/generate_documentation.py
+RUN git clone --depth=1 -b master https://github.com/ros-infrastructure/jenkins_scripts.git $workspace/jenkins_scripts
 
-CMD $job_runner
+CMD ["python", "$workspace/generate_documentation.py", "--platform", "$platform", "--arch", "$arch", "--workspace", "$workspace", "abb"]

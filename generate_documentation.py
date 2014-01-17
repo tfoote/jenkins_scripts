@@ -9,9 +9,6 @@ from common import get_ros_env, call, check_output, BuildException
 from doc_stack import document_necessary, document_repo
 
 def main():
-    platform = os.environ.get('OS_PLATFORM', None)
-    arch = os.environ.get('ARCH', None)
-
     parser = argparse.ArgumentParser(description='Doc')
     parser.add_argument('rosdistro', help='The ROS distro')
     parser.add_argument('repo', help='The repository or stack name')
@@ -38,18 +35,12 @@ def main():
     os.makedirs(docspace)
 
     try:
-        doit(args.rosdistro, args.repo, workspace, docspace, args.platform, args.arch, args.no_chroot, args.skip_garbage, args.force)
+        homepage = 'http://docs.ros.org'
+        document_repo(args.workspace, docspace, args.ros_distro, args.stack,
+                  args.platform, args.arch, homepage, False, skip_garbage)
     finally:
         if not args.skip_garbage:
             shutil.rmtree(docspace)
-
-
-def doit(ros_distro, stack, workspace, docspace, platform, arch, no_chroot=False, skip_garbage=False, force=False):
-    #Run documentation generation on the stack
-    homepage = 'http://docs.ros.org'
-    document_repo(workspace, docspace, ros_distro, stack,
-                  platform, arch,
-                  homepage, no_chroot, skip_garbage, **necessary)
 
 
 if __name__ == '__main__':

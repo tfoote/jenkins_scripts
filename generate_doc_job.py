@@ -5,13 +5,16 @@ from string import Template
 
 TEMPLATE_FILE = 'template_doc_job.dock'
 
-def main(base, maintainer_name, maintainer_email, ros_distro, job_runner):
+def main(operating_system, platform, arch, maintainer_name, maintainer_email,
+    ros_distro, workspace):
     d = {
-        'base': base,
+        'operating_system': operating_system,
+        'platform': platform,
+        'arch': arch,
         'maintainer_name': maintainer_name,
         'maintainer_email': maintainer_email,
         'ros_distro': ros_distro,
-        'job_runner': job_runner
+        'workspace': workspace,
     }
 
     with open(TEMPLATE_FILE) as f:
