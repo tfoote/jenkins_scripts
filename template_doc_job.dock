@@ -20,6 +20,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -q -y graphviz python-sphinx 
 RUN rosdep init
 RUN rosdep update
 
-RUN git clone --depth=1 -b docker https://github.com/esteve/jenkins_scripts.git $workspace/jenkins_scripts
+ADD ./ "/tmp/jenkins_scripts/"
 
 CMD ["python", "$workspace/jenkins_scripts/generate_documentation.py", "--platform", "$platform", "--arch", "$arch", "--workspace", "$workspace", "$ros_distro", "abb"]
