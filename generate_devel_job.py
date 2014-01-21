@@ -7,7 +7,7 @@ from subprocess import call
 import datetime
 from string import Template
 
-TEMPLATE_FILE = 'template_doc_job.dock'
+TEMPLATE_FILE = 'template_devel_job.dock'
 
 def main(operating_system, platform, arch, maintainer_name, maintainer_email,
     ros_distro, workspace, repo_name):
@@ -41,9 +41,9 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
         with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
             f2.write(res)
         call(['cat', '%(base_dir)s/Dockerfile' % d])
-        cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-doc %(base_dir)s' % d
+        cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel %(base_dir)s' % d
         call(cmd.split())
-        call(['sudo', 'docker', 'run', 'osrf-jenkins-%(platform)s-%(ros_distro)s-doc' % d])
+        call(['sudo', 'docker', 'run', 'osrf-jenkins-%(platform)s-%(ros_distro)s-devel' % d])
     shutil.rmtree(tmp_dir)
 
 

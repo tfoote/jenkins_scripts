@@ -28,4 +28,4 @@ RUN rosdep update
 
 ADD ./ $workspace/jenkins_scripts/
 
-CMD ["python", "$workspace/jenkins_scripts/docker_generate_documentation.py", "--platform", "$platform", "--arch", "$arch", "--workspace", "$workspace", "$ros_distro", "$repo_name"]
+CMD ["python", "$workspace/jenkins_scripts/docker_devel.py", "--workspace", "$workspace", "$ros_distro", "$repo_name"]
