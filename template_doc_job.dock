@@ -23,6 +23,7 @@ RUN apt-get install -q -y ros-$ros_distro-ros ros-$ros_distro-genmsg python-rosi
 RUN apt-get install -q -y python-kitchen
 RUN apt-get install -q -y python-catkin-pkg python-docutils python-rospkg python-networkx
 RUN apt-get install -q -y graphviz python-sphinx python-yaml doxygen python-epydoc
+RUN apt-get install -q -y build-essential
 RUN rosdep init
 RUN rosdep update
 
