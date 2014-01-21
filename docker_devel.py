@@ -16,8 +16,6 @@ def main():
     ros_distro = args[0]
     repositories = args[1:]
     versions = ['devel' for _ in repositories]
-    if not options.workspace:
-        options.workspace = os.environ['WORKSPACE']
 
     print "Running prerelease test on distro %s and repositories %s" % (ros_distro, ', '.join(repositories))
     test_repositories(ros_distro, repositories, versions, options.workspace, test_depends_on=False,
