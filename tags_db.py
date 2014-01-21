@@ -78,7 +78,7 @@ class TagsDb(object):
         self.delete_tag_index_repo()
 
         command = ['bash', '-c', 'export GIT_SSH="%s/git_ssh" \
-                   && git clone git@github.com:ros-infrastructure/rosdoc_tag_index.git %s' \
+                   && git clone git://github.com/ros-infrastructure/rosdoc_tag_index.git %s' \
                    % (self.jenkins_scripts_path, self.path)]
 
         call_with_list(command)

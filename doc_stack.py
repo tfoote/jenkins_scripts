@@ -386,11 +386,11 @@ def document_repo(workspace, docspace, ros_distro, repo,
     #We'll need the full list of apt_deps to get tag files
     full_apt_deps = get_full_apt_deps(apt_deps, apt)
 
-    if not no_chroot:
-        print "Installing all dependencies for %s" % repo
-        if apt_deps:
-            call("apt-get install %s --yes" % (' '.join(apt_deps)))
-        print "Done installing dependencies"
+    #if not no_chroot:
+    #    print "Installing all dependencies for %s" % repo
+    #    if apt_deps:
+    #        call("apt-get install %s --yes" % (' '.join(apt_deps)))
+    #    print "Done installing dependencies"
 
     #Set up the list of things that need to be sourced to run rosdoc_lite
     #TODO: Hack for electric

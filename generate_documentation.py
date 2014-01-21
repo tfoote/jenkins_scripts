@@ -17,20 +17,8 @@ def checkout_rosdoc_lite(workspace, ros_distro, no_chroot=False):
     call("git clone git://github.com/ros-infrastructure/rosdoc_lite.git %s" % checkout_path)
     old_dir = os.getcwd()
     os.chdir(checkout_path)
-    special_branch = {'fuerte': 'fuerte-devel'}
-    if ros_distro in special_branch:
-        call("git checkout %s" % special_branch[ros_distro])
     rev = check_output("git rev-parse HEAD").split('\n')[0]
     os.chdir(old_dir)
-    return rev
-
-def get_jenkins_scripts_version(workspace, no_chroot=False):
-    if not no_chroot:
-        old_dir = os.getcwd()
-        os.chdir(os.path.join(workspace, 'jenkins_scripts'))
-    rev = check_output("git rev-parse HEAD").split('\n')[0]
-    if not no_chroot:
-        os.chdir(old_dir)
     return rev
 
 def main():
@@ -60,18 +48,21 @@ def main():
     os.makedirs(docspace)
 
     try:
-        jenkins_scripts_version = get_jenkins_scripts_version(args.workspace)
+        jenkins_scripts_version = 'LATEST'
 
         rosdoc_lite_version = checkout_rosdoc_lite(args.workspace, args.rosdistro)
 
+        print "WORKSPACE: ", args.workspace
+
         necessary = document_necessary(args.workspace, docspace, args.rosdistro, args.repo,
             rosdoc_lite_version, jenkins_scripts_version, args.force)
+
         if not necessary:
             return
 
         homepage = 'http://docs.ros.org'
         document_repo(args.workspace, docspace, args.rosdistro, args.repo,
-                  args.platform, args.arch, homepage, False, True, None, None, None)
+                  args.platform, args.arch, homepage, False, True, **necessary)
     finally:
         if not args.skip_garbage:
             shutil.rmtree(docspace)
