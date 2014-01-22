@@ -24,9 +24,10 @@ RUN apt-get install -q -y python-kitchen
 RUN apt-get install -q -y python-catkin-pkg python-docutils python-rospkg python-networkx
 RUN apt-get install -q -y graphviz python-sphinx python-yaml doxygen python-epydoc
 RUN apt-get install -q -y build-essential
+RUN apt-get install -q -y sudo
 RUN rosdep init
 RUN rosdep update
 
 ADD ./ $workspace/jenkins_scripts/
 
-CMD ["python", "$workspace/jenkins_scripts/docker_metrics.py", "$ros_distro", "$stack", "$build_system"]
+CMD ["python", "$workspace/jenkins_scripts/docker_metrics.py", "$platform", "$ros_distro", "$stack", "$build_system", "$workspace"]

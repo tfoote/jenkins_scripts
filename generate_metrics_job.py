@@ -10,7 +10,7 @@ from string import Template
 TEMPLATE_FILE = 'template_metrics_job.dock'
 
 def main(operating_system, platform, arch, maintainer_name, maintainer_email,
-    ros_distro, stack, build_system):
+    ros_distro, workspace, stack, build_system):
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
@@ -24,6 +24,7 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
         'maintainer_name': maintainer_name,
         'maintainer_email': maintainer_email,
         'ros_distro': ros_distro,
+        'workspace': workspace,
         'tmp_dir': tmp_dir,
         'base_dir': base_dir,
         'timestamp': timestamp,

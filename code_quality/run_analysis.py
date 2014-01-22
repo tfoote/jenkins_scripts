@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import sys
-sys.path.append('%s/jenkins_scripts'%os.environ['WORKSPACE'])
 import subprocess
 import string
 import fnmatch
@@ -33,7 +32,7 @@ def remove(list1, list2):
             list1.remove(l)
 
 
-def run_analysis(ros_distro, stack_name, workspace, build_system, test_depends_on):
+def run_analysis(platform, ros_distro, stack_name, workspace, build_system, test_depends_on):
     print "Install basic stuff we need"
     print "(Testing on distro %s)"%ros_distro
     print "(Testing stack %s)"%stack_name
@@ -41,7 +40,7 @@ def run_analysis(ros_distro, stack_name, workspace, build_system, test_depends_o
     # set environment
     print "Set basic environment"
     env = get_environment2()
-    env['OS_PLATFORM'] = '%s'%os.environ['OS_PLATFORM']
+    env['OS_PLATFORM'] = '%s'%platform
     env['ROS_DISTRO'] = '%s'%ros_distro
     env['STACK_NAME'] = '%s'%stack_name
     env['WORKSPACE'] = '%s'%workspace
