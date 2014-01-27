@@ -27,12 +27,12 @@ def main():
         with open(os.path.join(sources_path, 'layers.txt.new'), 'w') as f2:
             for line in f1:
                 if line.startswith('meta-ros'):
-                    f2.write('meta-ros,%s,%s,HEAD' % (meta_ros_repo, meta_ros_branch))
+                    f2.write('meta-ros,%s,%s,HEAD\n' % (meta_ros_repo, meta_ros_branch))
                 else:
                     f2.write(line)
-                f2.write('\n')
     os.rename(os.path.join(sources_path, 'layers.txt.new'), os.path.join(sources_path, 'layers.txt'))
-    call('cd %s && su rosbuilder -c "%s bitbake core-image-ros-world"' % (base_path, oebb_path), shell=True)
+    call('su rosbuilder -c "cd %s && ./oebb.sh update"' % (base_path), shell=True)
+    call('su rosbuilder -c "cd %s && ./oebb.sh bitbake core-image-ros-world"' % (base_path), shell=True)
 
 if __name__ == '__main__':
     # global try

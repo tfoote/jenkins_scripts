@@ -17,12 +17,15 @@ RUN apt-get install -q -y texinfo
 RUN apt-get install -q -y chrpath
 RUN apt-get install -q -y bzip2
 RUN apt-get install -q -y wget
+RUN apt-get install -q -y sed
 RUN echo dash dash/sh boolean false | debconf-set-selections
 RUN dpkg-reconfigure dash
 RUN useradd rosbuilder
 RUN su rosbuilder -c "git clone -b angstrom-$angstrom_version https://github.com/Angstrom-distribution/setup-scripts $workspace/setup-scripts"
+RUN sed -i -e 's#meta-ros,.*#meta-ros,git://github.com/bmwcarit/meta-ros.git,master,HEAD#g' $workspace/setup-scripts/sources/layers.txt
 RUN cd $workspace/setup-scripts/ && su rosbuilder -c "./oebb.sh config $machine"
 RUN cd $workspace/setup-scripts/ && su rosbuilder -c "./oebb.sh update"
+RUN cd $workspace/setup-scripts/ && su rosbuilder -c "./oebb.sh bitbake pseudo-native"
 RUN cd $workspace/setup-scripts/ && su rosbuilder -c "./oebb.sh bitbake core-image-ros-world"
 
 ADD ./ $workspace/jenkins_scripts/
