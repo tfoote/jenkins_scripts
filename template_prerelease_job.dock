@@ -2,7 +2,6 @@ FROM $operating_system:$platform
 MAINTAINER $maintainer_name $maintainer_email
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV DOCKER_TIMESTAMP $timestamp
 RUN echo deb http://archive.ubuntu.com/ubuntu precise main universe multiverse | tee /etc/apt/sources.list
 RUN echo deb http://pkg.jenkins-ci.org/debian binary/ | tee /etc/apt/sources.list.d/jenkins.list
 RUN echo deb http://packages.ros.org/ros/ubuntu precise main | tee /etc/apt/sources.list.d/ros-latest.list

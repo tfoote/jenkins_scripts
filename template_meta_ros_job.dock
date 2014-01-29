@@ -2,7 +2,6 @@ FROM $operating_system:$platform
 MAINTAINER $maintainer_name $maintainer_email
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV DOCKER_TIMESTAMP $timestamp
 ENV MACHINE $machine
 RUN echo deb http://archive.ubuntu.com/ubuntu precise main universe multiverse | tee /etc/apt/sources.list
 RUN apt-get update
