@@ -30,7 +30,7 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
     #    repo_build_dependencies.append('catkin')
 
     pkg_deps = rosdep_resolver.to_aptlist(repo_build_dependencies)
-    dependencies = '\n'.join(['RUN apt-get install ' + pkg for pkg in pkg_deps])
+    dependencies = '\n'.join(['RUN apt-get install -q -y ' + pkg for pkg in pkg_deps])
 
     d = {
         'operating_system': operating_system,
@@ -61,7 +61,7 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
         cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
         print(cmd)
         call(cmd.split())
-        cmd = 'sudo docker run -v /tmp/src:%(repo_sourcespace)s:ro osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s' % d
+        cmd = 'sudo docker run -v %(repo_sourcespace)s:/tmp/src:ro osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s' % d
         print(cmd)
         call(cmd.split())
     shutil.rmtree(tmp_dir)
