@@ -26,8 +26,8 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
 
     repo_build_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=False)
     # ensure that catkin gets installed, for non-catkin packages so that catkin_make_isolated is available
-    #if 'catkin' not in repo_build_dependencies:
-    #    repo_build_dependencies.append('catkin')
+    if 'catkin' not in repo_build_dependencies:
+        repo_build_dependencies.append('catkin')
 
     pkg_deps = rosdep_resolver.to_aptlist(repo_build_dependencies)
     dependencies = '\n'.join(['RUN apt-get install -q -y ' + pkg for pkg in pkg_deps])
