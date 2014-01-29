@@ -24,7 +24,7 @@ RUN apt-get install -q -y python-catkin-pkg python-docutils python-rospkg python
 RUN apt-get install -q -y graphviz python-sphinx python-yaml doxygen python-epydoc
 RUN apt-get install -q -y build-essential
 RUN apt-get install -q -y python-catkin-pkg python-rosinstall python-rosdistro
-RUN apg-get install -q -y lsb-release python-rosdep
+RUN apt-get install -q -y lsb-release python-rosdep
 RUN useradd rosbuilder
 RUN rosdep init
 RUN su rosbuilder -c "rosdep update"
@@ -32,4 +32,5 @@ $dependencies
 
 ADD ./ $workspace/jenkins_scripts/
 
-CMD ["su", "rosbuilder", "-c", "'python $workspace/jenkins_scripts/docker_devel.py --workspace $workspace $ros_distro $repo_sourcespace'"]
+#CMD ["su", "rosbuilder", "-c", "'python $workspace/jenkins_scripts/docker_devel.py --workspace $workspace $ros_distro $repo_sourcespace'"]
+CMD ["su", "rosbuilder", "-c", "'/bin/echo foo'"]
