@@ -29,6 +29,7 @@ RUN useradd -m rosbuilder
 RUN rosdep init
 RUN su rosbuilder -c ". /opt/ros/$ros_distro/setup.sh && rosdep update"
 $dependencies
+RUN su rosbuilder -c "mkdir -p $workspace"
 
 ADD ./ $workspace/jenkins_scripts/
 

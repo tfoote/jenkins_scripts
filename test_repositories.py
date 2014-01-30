@@ -7,6 +7,12 @@ import yaml
 
 from common import *
 
+from catkin_pkg.package import InvalidPackage, parse_package_string
+from rosdistro import get_cached_distribution, get_index, get_index_url, get_source_file
+from rosdistro.dependency_walker import DependencyWalker
+from rosdistro.manifest_provider import get_release_tag
+
+
 def test_repositories(ros_distro, repo_list, version_list, workspace, test_depends_on, build_in_workspace=False, sudo=False, no_chroot=False):
     print "Testing on distro %s" % ros_distro
     print "Testing repositories %s" % ', '.join(repo_list)
@@ -29,26 +35,15 @@ def test_repositories(ros_distro, repo_list, version_list, workspace, test_depen
     except Exception:
         print "Temp folder did not exist yet"
     repo_sourcespace = os.path.join(tmpdir, 'src_repository')
+    repo_path = os.path.join('/tmp', 'src')
+    shutil.copytree(repo_path, repo_sourcespace)
     dependson_sourcespace = os.path.join(tmpdir, 'src_depends_on')
     repo_buildspace = os.path.join(tmpdir, 'build_repository')
     dependson_buildspace = os.path.join(tmpdir, 'build_depend_on')
 
-    return _test_repositories(ros_distro, repo_list, version_list, workspace, test_depends_on,
-                       repo_sourcespace, dependson_sourcespace, repo_buildspace, dependson_buildspace,
-                       sudo, no_chroot)
-
-
-def _test_repositories(ros_distro, repo_list, version_list, workspace, test_depends_on,
-                       repo_sourcespace, dependson_sourcespace, repo_buildspace, dependson_buildspace,
-                       sudo=False, no_chroot=False):
-    from catkin_pkg.package import InvalidPackage, parse_package_string
-    from rosdistro import get_cached_release, get_index, get_index_url, get_source_file
-    from rosdistro.dependency_walker import DependencyWalker
-    from rosdistro.manifest_provider import get_release_tag
-
     index = get_index(get_index_url())
     print "Parsing rosdistro file for %s" % ros_distro
-    release = get_cached_release(index, ros_distro)
+    release = get_cached_distribution(index, ros_distro)
     print "Parsing devel file for %s" % ros_distro
     source_file = get_source_file(index, ros_distro)
 
@@ -61,30 +56,14 @@ def _test_repositories(ros_distro, repo_list, version_list, workspace, test_depe
     print "Creating rosinstall file for repo list"
     rosinstall = ""
     for repo_name, version in zip(repo_list, version_list):
-        if version == 'devel':
-            if repo_name not in source_file.repositories:
-                raise BuildException("Repository %s does not exist in Devel Distro" % repo_name)
-            print "Using devel distro file to download repositories"
-            rosinstall += _generate_rosinstall_for_repo(source_file.repositories[repo_name])
-        else:
-            if repo_name not in release.repositories:
-                raise BuildException("Repository %s does not exist in Ros Distro" % repo_name)
-            repo = release.repositories[repo_name]
-            if version not in ['latest', 'master']:
-                assert repo.version is not None, 'Repository "%s" does not have a version set' % repo_name
-            assert 'release' in repo.tags, 'Repository "%s" does not have a "release" tag set' % repo_name
-            for pkg_name in repo.package_names:
-                release_tag = get_release_tag(repo, pkg_name)
-                if version in ['latest', 'master']:
-                    release_tag = '/'.join(release_tag.split('/')[:-1])
-                print 'Using tag "%s" of release distro file to download package "%s from repo "%s' % (version, pkg_name, repo_name)
-                rosinstall += _generate_rosinstall_for_pkg_version(release.repositories[repo_name], pkg_name, release_tag)
-                pkg_names.add(pkg_name)
+        repo_path = os.path.join('/tmp', 'src')
+        repo_name = os.path.basename(repo_path)
+        rosinstall += _generate_rosinstall_for_repo(repo_sourcespace)
     print "rosinstall file for all repositories: \n %s" % rosinstall
     with open(os.path.join(workspace, "repo.rosinstall"), 'w') as f:
         f.write(rosinstall)
     print "Install repo list from source"
-    os.makedirs(repo_sourcespace)
+    #os.makedirs(repo_sourcespace)
     call("rosinstall %s %s/repo.rosinstall --catkin" % (repo_sourcespace, workspace))
 
     # replace the CMakeLists.txt file for repositories that use catkin
@@ -292,25 +271,23 @@ def _generate_rosinstall_for_pkg(repo, pkg_name):
     return _generate_rosinstall_for_pkg_version(repo, pkg_name, get_release_tag(repo, pkg_name))
 
 
-def _generate_rosinstall_for_pkg_version(repo, pkg_name, version):
+def _generate_rosinstall_for_pkg_version(repo, pkg_name, version, uri=None):
+    if uri is None:
+        uri = repo.url
+
     repo_data = {
         'local-name': pkg_name,
-        'uri': repo.url,
+        'uri': uri,
         'version': version
     }
     return yaml.safe_dump([{repo.type: repo_data}], default_style=False)
 
 
-def _generate_rosinstall_for_repo(repo, version=None):
+def _generate_rosinstall_for_repo(repo_path, version='version', uri=None):
     repo_data = {
-        'local-name': repo.name,
-        'uri': repo.url
+        'local-name': repo_path,
     }
-    if version is not None:
-        repo_data['version'] = version
-    elif repo.version:
-        repo_data['version'] = repo.version
-    return yaml.safe_dump([{repo.type: repo_data}], default_style=False)
+    return yaml.safe_dump([{'other': repo_data}], default_style=False)
 
 
 def main():
