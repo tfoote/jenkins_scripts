@@ -17,9 +17,17 @@ def main():
     repositories = args[1:]
     versions = ['devel' for _ in repositories]
 
+    lsb_info = {}
+    with open('/etc/lsb-release') as f:
+        for line in f:
+            key, value = line.split('=')
+            lsb_info[key] = value
+
+    platform = lsb_info['DISTRIB_CODENAME']
+
     print "Running prerelease test on distro %s and repositories %s" % (ros_distro, ', '.join(repositories))
     test_repositories(ros_distro, repositories, versions, options.workspace, test_depends_on=False,
-                      build_in_workspace=options.build_in_workspace, sudo=options.sudo)
+        platform=platform, build_in_workspace=options.build_in_workspace, sudo=options.sudo)
 
 
 if __name__ == '__main__':

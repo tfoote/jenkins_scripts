@@ -13,7 +13,7 @@ from rosdistro.dependency_walker import DependencyWalker
 from rosdistro.manifest_provider import get_release_tag
 
 
-def test_repositories(ros_distro, repo_list, version_list, workspace, test_depends_on, build_in_workspace=False, sudo=False, no_chroot=False):
+def test_repositories(ros_distro, repo_list, version_list, workspace, test_depends_on, platform, build_in_workspace=False, sudo=False, no_chroot=False):
     print "Testing on distro %s" % ros_distro
     print "Testing repositories %s" % ', '.join(repo_list)
     print "Testing versions %s" % ', '.join(version_list)
@@ -83,39 +83,31 @@ def test_repositories(ros_distro, repo_list, version_list, workspace, test_depen
         shutil.rmtree(test_results_dir)
     os.makedirs(test_results_dir)
 
-    if not non_catkin_pkgs:
-        print "Build catkin workspace"
-        call("catkin_init_workspace %s" % repo_sourcespace, ros_env)
-        repos_test_results_dir = os.path.join(test_results_dir, 'repos')
-        call("cmake %s -DCATKIN_TEST_RESULTS_DIR=%s" % (repo_sourcespace, repos_test_results_dir), ros_env)
-        #ros_env_repo = get_ros_env(os.path.join(repo_buildspace, 'devel/setup.bash'))
+    print "Build catkin workspace"
+    call("catkin_init_workspace %s" % repo_sourcespace, ros_env)
+    repos_test_results_dir = os.path.join(test_results_dir, 'repos')
+    call("cmake %s -DCATKIN_TEST_RESULTS_DIR=%s" % (repo_sourcespace, repos_test_results_dir), ros_env)
+    #ros_env_repo = get_ros_env(os.path.join(repo_buildspace, 'devel/setup.bash'))
 
-        # build repositories and tests
-        print "Build repo list"
-        call("make", ros_env)
-        call("make tests", ros_env)
+    # build repositories and tests
+    print "Build repo list"
+    call("make", ros_env)
+    call("make tests", ros_env)
 
-        # get the repositories test and run dependencies
-        print "Get test and run dependencies of repo list"
-        repo_test_dependencies = get_dependencies(repo_sourcespace, build_depends=False, test_depends=True)
-        print "Install test and run dependencies of repo list: %s" % (', '.join(repo_test_dependencies))
-        apt_get_install(repo_test_dependencies, rosdep_resolver, sudo)
+    rosdep_resolver = rosdep.RosDepResolver(ros_distro, platform, False, False)
 
-        # run tests
-        print "Test repo list"
-        call("make run_tests", ros_env)
+    # get the repositories test and run dependencies
+    print "Get test and run dependencies of repo list"
+    repo_test_dependencies = get_dependencies(repo_sourcespace, build_depends=False, test_depends=True)
+    print "Install test and run dependencies of repo list: %s" % (', '.join(repo_test_dependencies))
+    apt_get_install(repo_test_dependencies, rosdep_resolver, sudo)
 
-        # anything after this should build on this env
-        ros_env = get_ros_env(os.path.join(repo_buildspace, 'devel/setup.bash'))
+    # run tests
+    print "Test repo list"
+    call("make run_tests", ros_env)
 
-    else:
-        print "Build workspace with non-catkin packages in isolation"
-        # work around catkin_make_isolated issue (at least with version 0.5.65 of catkin)
-        os.makedirs(os.path.join(repo_buildspace, 'devel_isolated'))
-        call('catkin_make_isolated --source %s --install-space install_isolated --install' % repo_sourcespace, ros_env)
-        setup_file = os.path.join(repo_buildspace, 'install_isolated', 'setup.sh')
-        # anything after this should build on this env
-        ros_env = get_ros_env(setup_file)
+    # anything after this should build on this env
+    ros_env = get_ros_env(os.path.join(repo_buildspace, 'devel/setup.bash'))
 
     # don't do depends-on on things not in release
     not_in_release = set(repo_list) - set(release.repositories.keys())
