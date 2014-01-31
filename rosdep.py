@@ -10,8 +10,7 @@ class RosDepResolver:
 
     def build_db(self):
         print "Building dictionaries from a rosdep's db"
-        ros_env = get_ros_env('/opt/ros/%s/setup.bash' % self.ros_distro)
-        raw_db = check_output("rosdep db", ros_env, verbose=False).split('\n')
+        raw_db = check_output("rosdep db --rosdistro=%s" % self.ros_distro, verbose=False).split('\n')
 
         for entry in raw_db:
             split_entry = entry.split(' -> ')
