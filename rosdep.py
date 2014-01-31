@@ -2,15 +2,16 @@ from common import *
 
 
 class RosDepResolver:
-    def __init__(self, ros_distro, sudo=False, no_chroot=False):
+    def __init__(self, ros_distro, platform, sudo=False, no_chroot=False):
         self.r2a = {}
         self.a2r = {}
         self.ros_distro = ros_distro
+        self.platform = platform
         self.build_db()
 
     def build_db(self):
         print "Building dictionaries from a rosdep's db"
-        raw_db = check_output("rosdep db --rosdistro=%s" % self.ros_distro, verbose=False).split('\n')
+        raw_db = check_output("rosdep db --rosdistro=%s --os=ubuntu:%s" % (self.ros_distro, self.platform), verbose=False).split('\n')
 
         for entry in raw_db:
             split_entry = entry.split(' -> ')

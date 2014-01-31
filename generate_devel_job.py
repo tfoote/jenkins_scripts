@@ -20,7 +20,7 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
 
-    rosdep_resolver = rosdep.RosDepResolver(ros_distro, False, False)
+    rosdep_resolver = rosdep.RosDepResolver(ros_distro, platform, False, False)
 
     repo_sourcespace = os.path.abspath(repo_path)
 

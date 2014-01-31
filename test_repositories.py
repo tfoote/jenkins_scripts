@@ -47,10 +47,6 @@ def test_repositories(ros_distro, repo_list, version_list, workspace, test_depen
     print "Parsing devel file for %s" % ros_distro
     source_file = get_source_file(index, ros_distro)
 
-    # Create rosdep object
-    print "Create rosdep object"
-    rosdep_resolver = rosdep.RosDepResolver(ros_distro, sudo, no_chroot)
-
     # download the repo_list from source
     pkg_names = set([])
     print "Creating rosinstall file for repo list"
