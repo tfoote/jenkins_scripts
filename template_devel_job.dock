@@ -25,12 +25,12 @@ RUN apt-get install -q -y graphviz python-sphinx python-yaml doxygen python-epyd
 RUN apt-get install -q -y build-essential
 RUN apt-get install -q -y python-catkin-pkg python-rosinstall python-rosdistro
 RUN apt-get install -q -y lsb-release python-rosdep
-RUN useradd -m rosbuilder
+RUN useradd -m rosbuild
 RUN rosdep init
-RUN su rosbuilder -c ". /opt/ros/$ros_distro/setup.sh && rosdep update"
+RUN su rosbuild -c ". /opt/ros/$ros_distro/setup.sh && rosdep update"
 $dependencies
-RUN su rosbuilder -c "mkdir -p $workspace"
+RUN su rosbuild -c "mkdir -p $workspace"
 
 ADD ./ $workspace/jenkins_scripts/
 
-CMD ["su", "rosbuilder", "-c", "python $workspace/jenkins_scripts/docker_devel.py --workspace $workspace $ros_distro $repo_sourcespace"]
+CMD ["su", "rosbuild", "-c", "python $workspace/jenkins_scripts/docker_devel.py --workspace $workspace $ros_distro $repo_sourcespace"]

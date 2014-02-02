@@ -8,11 +8,25 @@ import datetime
 from string import Template
 import rosdep
 from common import get_dependencies
+import optparse
+
 
 TEMPLATE_FILE = 'template_devel_job.dock'
 
-def main(operating_system, platform, arch, maintainer_name, maintainer_email,
-    ros_distro, workspace, repo_path):
+def main():
+    parser = optparse.OptionParser()
+    parser.add_option("--rebuild", action="store_true", default=False)
+    (options, args) = parser.parse_args()
+
+    operating_system = args[0]
+    platform = args[1]
+    arch = args[2]
+    maintainer_name = args[3]
+    maintainer_email = args[4]
+    ros_distro = args[5]
+    workspace = args[6]
+    repo_path = args[7]
+
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
@@ -58,7 +72,10 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
         with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
             f2.write(res)
         call(['cat', '%(base_dir)s/Dockerfile' % d])
-        cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
+        if options.rebuild:
+            cmd = 'sudo docker build -no-cache -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
+        else:
+            cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
         print(cmd)
         call(cmd.split())
         cmd = 'sudo docker run -v %(repo_sourcespace)s:/tmp/src:ro osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s' % d
@@ -68,4 +85,4 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
 
 
 if __name__ == '__main__':
-    main(*sys.argv[1:])
+    main()

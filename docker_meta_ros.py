@@ -31,8 +31,8 @@ def main():
                 else:
                     f2.write(line)
     os.rename(os.path.join(sources_path, 'layers.txt.new'), os.path.join(sources_path, 'layers.txt'))
-    call('su rosbuilder -c "cd %s && ./oebb.sh update"' % (base_path), shell=True)
-    call('su rosbuilder -c "cd %s && ./oebb.sh bitbake core-image-ros-world"' % (base_path), shell=True)
+    call('su rosbuild -c "cd %s && ./oebb.sh update"' % (base_path), shell=True)
+    call('su rosbuild -c "cd %s && ./oebb.sh bitbake core-image-ros-world"' % (base_path), shell=True)
 
 if __name__ == '__main__':
     # global try
