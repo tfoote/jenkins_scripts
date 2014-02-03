@@ -108,7 +108,7 @@ def test_repositories(ros_distro, repo_list, version_list, workspace, test_depen
     installer_context = create_default_installer_context(verbose=True)
 
     installer = RosdepInstaller(installer_context, lookup)
-    installer.install(uninstalled, sudo=True)
+    installer.install(repo_test_dependencies, sudo=True)
 
     # run tests
     print "Test repo list"
