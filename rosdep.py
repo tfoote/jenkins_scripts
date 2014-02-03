@@ -11,7 +11,7 @@ class RosDepResolver:
 
     def build_db(self):
         print "Building dictionaries from a rosdep's db"
-        raw_db = check_output("rosdep db --rosdistro=%s --os=ubuntu:%s" % (self.ros_distro, self.platform), verbose=False).split('\n')
+        raw_db = check_output("rosdep --rosdistro=%s --os=ubuntu:%s db" % (self.ros_distro, self.platform), verbose=False).split('\n')
 
         for entry in raw_db:
             split_entry = entry.split(' -> ')

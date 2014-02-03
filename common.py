@@ -3,6 +3,13 @@ import subprocess
 import sys
 import fnmatch
 
+from rosdep2 import RosdepLookup, create_default_installer_context, ResolutionError
+from rosdep2.sources_list import update_sources_list, get_sources_cache_dir,\
+     download_default_sources_list, SourcesListLoader,CACHE_INDEX,\
+     get_sources_list_dir, get_default_sources_list_file,\
+     DEFAULT_SOURCES_LIST_URL
+from rosdep2.rospkg_loader import DEFAULT_VIEW_KEY
+
 
 def append_pymodules_if_needed():
     #TODO: This is a hack, in the chroot, the default python path does not
@@ -267,3 +274,26 @@ class BuildException(Exception):
 
     def __init__(self, msg):
         self.msg = msg
+
+
+def get_package_dependencies(repo_build_dependencies, ros_distro):
+    # FIXME: there should be a way to set this without using an environment variable
+    os.environ['ROS_DISTRO'] = ros_distro
+
+    sources_loader = SourcesListLoader.create_default(verbose=True)
+    lookup = RosdepLookup.create_from_rospkg(sources_loader=sources_loader)
+    lookup.verbose = True
+    installer_context = create_default_installer_context(verbose=True)
+    os_name, os_version = installer_context.get_os_name_and_version()
+    installer_keys = installer_context.get_os_installer_keys(os_name)
+    default_key = installer_context.get_default_os_installer_key(os_name)
+    installer = installer_context.get_installer(default_key)
+
+    view = lookup.get_rosdep_view(DEFAULT_VIEW_KEY, verbose=True)
+
+    pkg_deps = []
+    for repo_build_dep in repo_build_dependencies:
+        d = view.lookup(repo_build_dep)
+        inst_key, rule = d.get_rule_for_platform(os_name, os_version, installer_keys, default_key)
+        pkg_deps.extend(installer.resolve(rule))
+    return pkg_deps

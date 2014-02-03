@@ -94,13 +94,21 @@ def test_repositories(ros_distro, repo_list, version_list, workspace, test_depen
     call("make", ros_env)
     call("make tests", ros_env)
 
-    rosdep_resolver = rosdep.RosDepResolver(ros_distro, platform, False, False)
-
     # get the repositories test and run dependencies
     print "Get test and run dependencies of repo list"
     repo_test_dependencies = get_dependencies(repo_sourcespace, build_depends=False, test_depends=True)
     print "Install test and run dependencies of repo list: %s" % (', '.join(repo_test_dependencies))
-    apt_get_install(repo_test_dependencies, rosdep_resolver, sudo)
+
+    # FIXME: there should be a way to set this without using an environment variable
+    os.environ['ROS_DISTRO'] = ros_distro
+
+    sources_loader = SourcesListLoader.create_default(verbose=True)
+    lookup = RosdepLookup.create_from_rospkg(sources_loader=sources_loader)
+    lookup.verbose = True
+    installer_context = create_default_installer_context(verbose=True)
+
+    installer = RosdepInstaller(installer_context, lookup)
+    installer.install(uninstalled, sudo=True)
 
     # run tests
     print "Test repo list"

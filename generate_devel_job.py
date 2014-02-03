@@ -6,8 +6,8 @@ import tempfile
 from subprocess import call
 import datetime
 from string import Template
-import rosdep
-from common import get_dependencies
+
+from common import get_dependencies, get_package_dependencies
 import optparse
 
 
@@ -34,8 +34,6 @@ def main():
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
 
-    rosdep_resolver = rosdep.RosDepResolver(ros_distro, platform, False, False)
-
     repo_sourcespace = os.path.abspath(repo_path)
 
     repo_build_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=False)
@@ -43,7 +41,8 @@ def main():
     if 'catkin' not in repo_build_dependencies:
         repo_build_dependencies.append('catkin')
 
-    pkg_deps = rosdep_resolver.to_aptlist(repo_build_dependencies)
+    pkg_deps = get_package_dependencies(repo_build_dependencies, ros_distro=ros_distro)
+
     dependencies = '\n'.join(['RUN apt-get install -q -y ' + pkg for pkg in pkg_deps])
 
     d = {
