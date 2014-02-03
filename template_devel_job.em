@@ -27,7 +27,7 @@ RUN apt-get install -q -y python-catkin-pkg python-rosinstall python-rosdistro
 RUN apt-get install -q -y lsb-release python-rosdep
 RUN useradd -m rosbuild
 RUN rosdep init
-RUN su rosbuild -c ". /opt/ros/ros_distro/setup.sh && rosdep update"
+RUN su rosbuild -c "rosdep --rosdistro=@ros_distro update"
 @[for dependency in dependencies]
 RUN apt-get install -q -y @dependency
 @[end for]
