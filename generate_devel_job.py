@@ -5,13 +5,13 @@ import os
 import tempfile
 from subprocess import call
 import datetime
-from string import Template
+import em
 
 from common import get_dependencies, get_package_dependencies
 import optparse
 
 
-TEMPLATE_FILE = 'template_devel_job.dock'
+TEMPLATE_FILE = 'template_devel_job.em'
 
 def main():
     parser = optparse.OptionParser()
@@ -41,9 +41,7 @@ def main():
     if 'catkin' not in repo_build_dependencies:
         repo_build_dependencies.append('catkin')
 
-    pkg_deps = get_package_dependencies(repo_build_dependencies, ros_distro=ros_distro)
-
-    dependencies = '\n'.join(['RUN apt-get install -q -y ' + pkg for pkg in pkg_deps])
+    dependencies = get_package_dependencies(repo_build_dependencies, ros_distro=ros_distro)
 
     d = {
         'operating_system': operating_system,
@@ -66,8 +64,7 @@ def main():
 
     with open(TEMPLATE_FILE) as f:
         tpl = f.read()
-        s = Template(tpl)
-        res = s.substitute(d)
+        res = em.expand(tpl, d)
         with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
             f2.write(res)
         call(['cat', '%(base_dir)s/Dockerfile' % d])

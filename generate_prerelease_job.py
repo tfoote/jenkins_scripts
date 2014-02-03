@@ -5,9 +5,9 @@ import os
 import tempfile
 from subprocess import call
 import datetime
-from string import Template
+import em
 
-TEMPLATE_FILE = 'template_prerelease_job.dock'
+TEMPLATE_FILE = 'template_prerelease_job.em'
 
 def main(operating_system, platform, arch, maintainer_name, maintainer_email,
     ros_distro, workspace, repo_name, version):
@@ -37,8 +37,7 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
 
     with open(TEMPLATE_FILE) as f:
         tpl = f.read()
-        s = Template(tpl)
-        res = s.substitute(d)
+        res = em.expand(tpl, d)
         with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
             f2.write(res)
         call(['cat', '%(base_dir)s/Dockerfile' % d])

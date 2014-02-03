@@ -1,5 +1,5 @@
-FROM $operating_system:$platform
-MAINTAINER $maintainer_name $maintainer_email
+FROM @operating_system:@platform
+MAINTAINER @maintainer_name @maintainer_email
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN echo deb http://archive.ubuntu.com/ubuntu precise main universe multiverse | tee /etc/apt/sources.list
@@ -18,15 +18,14 @@ RUN apt-get install -q -y mercurial
 RUN apt-get install -q -y git
 RUN apt-get install -q -y subversion
 RUN apt-get install -q -y openssh-client
-RUN apt-get install -q -y ros-$ros_distro-ros ros-$ros_distro-genmsg python-rosinstall
+RUN apt-get install -q -y ros-@ros_distro-ros ros-@ros_distro-genmsg python-rosinstall
 RUN apt-get install -q -y python-kitchen
 RUN apt-get install -q -y python-catkin-pkg python-docutils python-rospkg python-networkx
 RUN apt-get install -q -y graphviz python-sphinx python-yaml doxygen python-epydoc
 RUN apt-get install -q -y build-essential
-RUN apt-get install -q -y sudo
 RUN rosdep init
 RUN rosdep update
 
-ADD ./ $workspace/jenkins_scripts/
+ADD ./ @workspace/jenkins_scripts/
 
-CMD ["python", "$workspace/jenkins_scripts/docker_metrics.py", "$platform", "$ros_distro", "$stack", "$build_system", "$workspace"]
+CMD ["python", "@workspace/jenkins_scripts/docker_prerelease.py", "--workspace", "@workspace", "@ros_distro", "@repo_name", "@version"]
