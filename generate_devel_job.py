@@ -12,6 +12,7 @@ import optparse
 
 
 TEMPLATE_FILE = 'template_devel_job.em'
+TEMPLATE_BOOTSTRAP = 'template_bootstrap.em'
 
 
 def main():
@@ -68,21 +69,24 @@ def main():
     cur_path = os.path.dirname(os.path.abspath(__file__))
     shutil.copytree(cur_path, base_dir)
 
-    with open(TEMPLATE_FILE) as f:
+    with open(TEMPLATE_BOOTSTRAP) as f:
         tpl = f.read()
         res = em.expand(tpl, d)
-        with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
-            f2.write(res)
-        call(['cat', '%(base_dir)s/Dockerfile' % d])
-        if options.rebuild:
-            cmd = 'sudo docker build -no-cache -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
-        else:
-            cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
-        print(cmd)
-        call(cmd.split())
-        cmd = 'sudo docker run -v %(repo_sourcespace)s:/tmp/src:ro -v %(workspace)s:%(workspace)s:rw  osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s' % d
-        print(cmd)
-        call(cmd.split())
+    with open(TEMPLATE_FILE) as f:
+        tpl = f.read()
+        res += em.expand(tpl, d)
+    with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
+        f2.write(res)
+    call(['cat', '%(base_dir)s/Dockerfile' % d])
+    if options.rebuild:
+        cmd = 'sudo docker build -no-cache -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
+    else:
+        cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
+    print(cmd)
+    call(cmd.split())
+    cmd = 'sudo docker run -v %(repo_sourcespace)s:/tmp/src:ro -v %(workspace)s:%(workspace)s:rw  osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s' % d
+    print(cmd)
+    call(cmd.split())
     shutil.rmtree(tmp_dir)
 
 
