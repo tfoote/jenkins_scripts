@@ -11,6 +11,9 @@ from rosdep2.sources_list import update_sources_list, get_sources_cache_dir,\
 from rosdep2.rospkg_loader import DEFAULT_VIEW_KEY
 
 
+MAINTAINER_NAME = "ROS Release"
+MAINTAINER_EMAIL = "noreply@ros.org"
+
 def append_pymodules_if_needed():
     #TODO: This is a hack, in the chroot, the default python path does not
     if not os.path.abspath("/usr/lib/pymodules/python2.7") in sys.path:

@@ -7,9 +7,12 @@ from subprocess import call
 import datetime
 import em
 
+
+from common import MAINTAINER_NAME, MAINTAINER_EMAIL
+
 TEMPLATE_FILE = 'template_prerelease_job.em'
 
-def main(operating_system, platform, arch, maintainer_name, maintainer_email,
+def main(operating_system, platform, arch,
     ros_distro, workspace, repo_name, version):
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
@@ -21,8 +24,8 @@ def main(operating_system, platform, arch, maintainer_name, maintainer_email,
         'operating_system': operating_system,
         'platform': platform,
         'arch': arch,
-        'maintainer_name': maintainer_name,
-        'maintainer_email': maintainer_email,
+        'maintainer_name': MAINTAINER_NAME,
+        'maintainer_email': MAINTAINER_EMAIL,
         'ros_distro': ros_distro,
         'workspace': workspace,
         'tmp_dir': tmp_dir,

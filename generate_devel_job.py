@@ -7,11 +7,12 @@ from subprocess import call
 import datetime
 import em
 
-from common import get_dependencies, get_package_dependencies
+from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL
 import optparse
 
 
 TEMPLATE_FILE = 'template_devel_job.em'
+
 
 def main():
     parser = optparse.OptionParser()
@@ -22,11 +23,9 @@ def main():
     operating_system = args[0]
     platform = args[1]
     arch = args[2]
-    maintainer_name = args[3]
-    maintainer_email = args[4]
-    ros_distro = args[5]
-    workspace = args[6]
-    repo_path = args[7]
+    ros_distro = args[3]
+    workspace = args[4]
+    repo_path = args[5]
 
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
@@ -53,8 +52,8 @@ def main():
         'platform': platform,
         'arch': arch,
         'buildonly': options.buildonly,
-        'maintainer_name': maintainer_name,
-        'maintainer_email': maintainer_email,
+        'maintainer_name': MAINTAINER_NAME,
+        'maintainer_email': MAINTAINER_EMAIL,
         'ros_distro': ros_distro,
         'workspace': workspace,
         'tmp_dir': tmp_dir,
