@@ -5,8 +5,6 @@ import yaml
 
 from common import *
 
-from rosdistro import get_cached_distribution, get_index, get_index_url, get_source_file
-
 
 def run_devel_job(ros_distro, repo_list, version_list, workspace,
         platform, buildonly):
@@ -22,13 +20,6 @@ def run_devel_job(ros_distro, repo_list, version_list, workspace,
     shutil.copytree(repo_path, repo_sourcespace)
     repo_buildspace = os.path.join(workspace, 'build')
     test_results_dir = os.path.join(workspace, 'test_results')
-
-
-    index = get_index(get_index_url())
-    print "Parsing rosdistro file for %s" % ros_distro
-    release = get_cached_distribution(index, ros_distro)
-    print "Parsing devel file for %s" % ros_distro
-    source_file = get_source_file(index, ros_distro)
 
     # get environment
     ros_env = get_ros_env('/opt/ros/%s/setup.bash' % ros_distro)
@@ -56,6 +47,7 @@ def run_devel_job(ros_distro, repo_list, version_list, workspace,
     print "Build and run unit tests"
     call("catkin_make run_tests -DCATKIN_TEST_RESULTS_DIR=%s" % (test_results_dir), ros_env)
     call("catkin_test_results %s" % test_results_dir, ros_env)
+    print("Results available in %s " % workspace)
 
 
 
@@ -90,7 +82,7 @@ if __name__ == '__main__':
     # global try
     try:
         main()
-        print "devel script finished cleanly"
+        print "devel script finished cleanly."
 
     # global catch
     except BuildException as ex:
