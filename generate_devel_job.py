@@ -16,6 +16,7 @@ TEMPLATE_FILE = 'template_devel_job.em'
 def main():
     parser = optparse.OptionParser()
     parser.add_option("--rebuild", action="store_true", default=False)
+    parser.add_option("--buildonly", action="store_true", default=False)
     (options, args) = parser.parse_args()
 
     operating_system = args[0]
@@ -37,16 +38,21 @@ def main():
     repo_sourcespace = os.path.abspath(repo_path)
 
     repo_build_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=False)
+    repo_test_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=True)
     # ensure that catkin gets installed, for non-catkin packages so that catkin_make_isolated is available
     if 'catkin' not in repo_build_dependencies:
         repo_build_dependencies.append('catkin')
 
-    dependencies = get_package_dependencies(repo_build_dependencies, ros_distro=ros_distro)
+    dependencies = get_package_dependencies(repo_build_dependencies, ros_distro, operating_system, platform)
+    test_dependencies = get_package_dependencies(repo_test_dependencies, ros_distro, operating_system, platform)
+
+    test_dependencies = list(set(test_dependencies) - set(dependencies))
 
     d = {
         'operating_system': operating_system,
         'platform': platform,
         'arch': arch,
+        'buildonly': options.buildonly,
         'maintainer_name': maintainer_name,
         'maintainer_email': maintainer_email,
         'ros_distro': ros_distro,
@@ -56,6 +62,7 @@ def main():
         'timestamp': timestamp,
         'repo_sourcespace': repo_sourcespace,
         'dependencies': dependencies,
+        'test_dependencies': test_dependencies,
         'repo_name': os.path.basename(repo_sourcespace),
     }
 
@@ -74,7 +81,7 @@ def main():
             cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s %(base_dir)s' % d
         print(cmd)
         call(cmd.split())
-        cmd = 'sudo docker run -v %(repo_sourcespace)s:/tmp/src:ro osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s' % d
+        cmd = 'sudo docker run -v %(repo_sourcespace)s:/tmp/src:ro -v %(workspace)s:%(workspace)s:rw  osrf-jenkins-%(platform)s-%(ros_distro)s-devel-%(repo_name)s' % d
         print(cmd)
         call(cmd.split())
     shutil.rmtree(tmp_dir)
