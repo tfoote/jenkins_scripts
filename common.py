@@ -11,6 +11,9 @@ from rosdep2.sources_list import update_sources_list, get_sources_cache_dir,\
 from rosdep2.rospkg_loader import DEFAULT_VIEW_KEY
 
 
+MAINTAINER_NAME = "ROS Release"
+MAINTAINER_EMAIL = "noreply@ros.org"
+
 def append_pymodules_if_needed():
     #TODO: This is a hack, in the chroot, the default python path does not
     if not os.path.abspath("/usr/lib/pymodules/python2.7") in sys.path:
@@ -276,7 +279,7 @@ class BuildException(Exception):
         self.msg = msg
 
 
-def get_package_dependencies(repo_build_dependencies, ros_distro):
+def get_package_dependencies(repo_build_dependencies, ros_distro, os_name, os_version):
     # FIXME: there should be a way to set this without using an environment variable
     os.environ['ROS_DISTRO'] = ros_distro
 
@@ -284,7 +287,6 @@ def get_package_dependencies(repo_build_dependencies, ros_distro):
     lookup = RosdepLookup.create_from_rospkg(sources_loader=sources_loader)
     lookup.verbose = True
     installer_context = create_default_installer_context(verbose=True)
-    os_name, os_version = installer_context.get_os_name_and_version()
     installer_keys = installer_context.get_os_installer_keys(os_name)
     default_key = installer_context.get_default_os_installer_key(os_name)
     installer = installer_context.get_installer(default_key)
