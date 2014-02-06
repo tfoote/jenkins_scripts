@@ -6,8 +6,9 @@ import tempfile
 from subprocess import call
 import datetime
 import em
+import errno
 
-from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL
+from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL, BuildException
 import optparse
 
 
@@ -21,6 +22,10 @@ def main():
     parser.add_option("--buildonly", action="store_true", default=False)
     (options, args) = parser.parse_args()
 
+    if len(args) != 6:
+        print("Usage: %s operating_system platform arch ros_distro workspace repo_path " % sys.argv[0])
+        raise BuildException("Wrong arguments for devel script")
+
     operating_system = args[0]
     platform = args[1]
     arch = args[2]
@@ -31,6 +36,12 @@ def main():
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
+
+    try:
+        os.makedirs(workspace)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
@@ -91,4 +102,15 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # global try
+    try:
+        main()
+        print("devel script finished cleanly.")
+
+    # global catch
+    except BuildException as ex:
+        print(ex.msg)
+
+    except Exception as ex:
+        print("devel script failed. Check out the console output above for details.")
+        raise

@@ -2,7 +2,7 @@ FROM @operating_system:@platform
 MAINTAINER @maintainer_name @maintainer_email
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV MACHINE @machine
+ENV MACHINE @machine_type
 RUN echo deb http://archive.ubuntu.com/ubuntu precise main universe multiverse | tee /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -q -y apt-utils
@@ -20,13 +20,7 @@ RUN apt-get install -q -y sed
 RUN echo dash dash/sh boolean false | debconf-set-selections
 RUN dpkg-reconfigure dash
 RUN useradd rosbuild
-RUN su rosbuild -c "git clone -b angstrom-@angstrom_version https://github.com/Angstrom-distribution/setup-scripts @workspace/setup-scripts"
-RUN sed -i -e 's#meta-ros,.*#meta-ros,git://github.com/bmwcarit/meta-ros.git,master,HEAD#g' @workspace/setup-scripts/sources/layers.txt
-RUN cd @workspace/setup-scripts/ && su rosbuild -c "./oebb.sh config @machine"
-RUN cd @workspace/setup-scripts/ && su rosbuild -c "./oebb.sh update"
-RUN cd @workspace/setup-scripts/ && su rosbuild -c "./oebb.sh bitbake pseudo-native"
-RUN cd @workspace/setup-scripts/ && su rosbuild -c "./oebb.sh bitbake core-image-ros-world"
 
-ADD ./ @workspace/jenkins_scripts/
+ADD ./ /tmp/jenkins_scripts/
 
-CMD ["python", "@workspace/jenkins_scripts/docker_meta_ros.py", "--workspace", "@workspace", "@angstrom_version", "@meta_ros_repo", "@meta_ros_branch"]
+CMD ["su", "rosbuild", "-c", "python /tmp/jenkins_scripts/docker_meta_ros.py --workspace @workspace /tmp/angstrom_src /tmp/meta_ros_src"]
