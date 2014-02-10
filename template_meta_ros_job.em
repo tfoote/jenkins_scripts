@@ -17,10 +17,16 @@ RUN apt-get install -q -y chrpath
 RUN apt-get install -q -y bzip2
 RUN apt-get install -q -y wget
 RUN apt-get install -q -y sed
+RUN apt-get install -q -y python2.7
+RUN apt-get install -q -y texi2html
+RUN apt-get install -q -y subversion
+RUN apt-get install -q -y gettext
 RUN echo dash dash/sh boolean false | debconf-set-selections
 RUN dpkg-reconfigure dash
-RUN useradd rosbuild
+RUN useradd -d /home/rosbuild -m -s /bin/bash rosbuild
 
 ADD ./ /tmp/jenkins_scripts/
+RUN chmod +x /tmp/jenkins_scripts/build_meta_ros.sh
 
-CMD ["su", "rosbuild", "-c", "python /tmp/jenkins_scripts/docker_meta_ros.py --workspace @workspace /tmp/angstrom_src /tmp/meta_ros_src"]
+ENV BITBAKE_UI knotty
+CMD python /tmp/jenkins_scripts/docker_meta_ros.py --workspace /home/rosbuild/workspace /tmp/angstrom_src /tmp/meta_ros_src @machine_type

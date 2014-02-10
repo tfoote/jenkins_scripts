@@ -3,16 +3,9 @@ import subprocess
 import sys
 import fnmatch
 
-from rosdep2 import RosdepLookup, create_default_installer_context, ResolutionError
-from rosdep2.sources_list import update_sources_list, get_sources_cache_dir,\
-     download_default_sources_list, SourcesListLoader,CACHE_INDEX,\
-     get_sources_list_dir, get_default_sources_list_file,\
-     DEFAULT_SOURCES_LIST_URL
-from rosdep2.rospkg_loader import DEFAULT_VIEW_KEY
-
-
 MAINTAINER_NAME = "ROS Release"
 MAINTAINER_EMAIL = "noreply@ros.org"
+
 
 def append_pymodules_if_needed():
     #TODO: This is a hack, in the chroot, the default python path does not
@@ -280,6 +273,10 @@ class BuildException(Exception):
 
 
 def get_package_dependencies(repo_build_dependencies, ros_distro, os_name, os_version):
+    from rosdep2 import RosdepLookup, create_default_installer_context, ResolutionError
+    from rosdep2.sources_list import SourcesListLoader
+    from rosdep2.rospkg_loader import DEFAULT_VIEW_KEY
+
     # FIXME: there should be a way to set this without using an environment variable
     os.environ['ROS_DISTRO'] = ros_distro
 
