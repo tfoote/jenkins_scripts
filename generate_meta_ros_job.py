@@ -17,7 +17,6 @@ TEMPLATE_FILE = 'template_meta_ros_job.em'
 def main():
     parser = optparse.OptionParser()
     parser.add_option("--rebuild", action="store_true", default=False)
-    parser.add_option("--buildonly", action="store_true", default=False)
     (options, args) = parser.parse_args()
 
     if len(args) != 7:
