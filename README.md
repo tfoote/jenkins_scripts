@@ -29,6 +29,44 @@ sudo apt-get install lxc-docker
 
 More information about how to install Docker can be found at http://docs.docker.io/en/latest/installation/ubuntulinux/
 
+These Docker scripts also employ a set of Python modules, namely:
+
+* [EMpy](http://www.alcyone.com/software/empy/) as the template engine
+* [rosdep](http://wiki.ros.org/rosdep) to resolve the dependency graph of ROS packages
+* [catkin_pkg](http://wiki.ros.org/catkin_pkg) to obtain information about ROS packages
+
+On an Ubuntu system, all these Python modules can be installed via the ROS APT repository. First add the appropiate APT sources.line, depending on your version of Ubuntu:
+
+Ubuntu 12.04 (Precise)
+```
+$ echo "deb http://packages.ros.org/ros/ubuntu precise main" | sudo tee /etc/apt/sources.list.d/ros-latest.list'
+```
+
+Ubuntu 12.10 (Quantal)
+```
+$ echo "deb http://packages.ros.org/ros/ubuntu quantal main" | sudo tee /etc/apt/sources.list.d/ros-latest.list'
+```
+
+Ubuntu 13.04 (Raring)
+```
+$ echo "deb http://packages.ros.org/ros/ubuntu raring main" | sudo tee /etc/apt/sources.list.d/ros-latest.list'
+```
+
+Setup the keys:
+```
+$ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+```
+
+Then update the APT database with:
+```
+$ sudo apt-get update
+```
+
+And finally install the Python modules typing the following:
+```
+$ sudo apt-get install python-empy python-rosdep python-catkin-pkg
+```
+
 Usage
 -----
 
