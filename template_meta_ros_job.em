@@ -26,7 +26,6 @@ RUN dpkg-reconfigure dash
 RUN useradd -d /home/rosbuild -m -s /bin/bash rosbuild
 
 ADD ./ /tmp/jenkins_scripts/
-RUN chmod +x /tmp/jenkins_scripts/build_meta_ros.sh
 
 ENV BITBAKE_UI knotty
 CMD python /tmp/jenkins_scripts/docker_meta_ros.py --workspace /home/rosbuild/workspace /tmp/angstrom_src /tmp/meta_ros_src @machine_type
