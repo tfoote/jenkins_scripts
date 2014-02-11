@@ -16,6 +16,7 @@ RUN apt-get install -q -y texinfo
 RUN apt-get install -q -y chrpath
 RUN apt-get install -q -y bzip2
 RUN apt-get install -q -y curl
+RUN apt-get install -q -y wget
 RUN apt-get install -q -y sed
 RUN apt-get install -q -y python2.7
 RUN apt-get install -q -y texi2html

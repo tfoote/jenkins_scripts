@@ -45,6 +45,13 @@ def main():
         if ose.errno != errno.EEXIST:
             raise
 
+    build_dir = os.path.join(workspace, 'build')
+    try:
+        os.makedirs(build_dir)
+    except OSError as ose:
+        if ose.errno != errno.EEXIST:
+            raise
+
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
@@ -66,6 +73,7 @@ def main():
         'workspace': workspace,
         'log_dir': log_dir,
         'output_dir': output_dir,
+        'build_dir': build_dir,
     }
 
     cur_path = os.path.dirname(os.path.abspath(__file__))
@@ -83,7 +91,7 @@ def main():
         cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-meta-ros %(base_dir)s' % d
     print(cmd)
     call(cmd.split())
-    cmd = 'sudo docker run -v %(angstrom_path)s:/tmp/angstrom_src:ro -v %(meta_ros_path)s:/tmp/meta_ros_src:ro -v %(log_dir)s:/var/log:rw  -v %(output_dir)s:/home/rosbuild/docker_output:rw osrf-jenkins-%(platform)s-meta-ros' % d
+    cmd = 'sudo docker run -v %(angstrom_path)s:/tmp/angstrom_src:ro -v %(meta_ros_path)s:/tmp/meta_ros_src:ro -v %(log_dir)s:/var/log:rw  -v %(output_dir)s:/home/rosbuild/workspace/setup-scripts/deploy:rw osrf-jenkins-%(platform)s-meta-ros' % d
     print(cmd)
     call(cmd.split())
     shutil.rmtree(tmp_dir)
