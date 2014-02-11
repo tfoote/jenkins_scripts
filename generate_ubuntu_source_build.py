@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import print_function
 import sys
 import shutil
@@ -10,10 +12,11 @@ import em
 from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL
 import optparse
 
-
-TEMPLATE_FILE = 'from_source/templates/ubuntu_deb.em'
-TEMPLATE_BOOTSTRAP = 'template_bootstrap.em'
-
+TEMPLATES = {
+    'ubuntudeb': [ 'template_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
+    'ubuntupip': [ 'from_source/templates/pip_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
+    'fedora': [ 'from_source/templates/fedora_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
+    }
 
 def main():
     parser = optparse.OptionParser()
@@ -28,6 +31,15 @@ def main():
     workspace = args[4]
     metapackage = args[5]
 
+    if len(args) == 7:
+        template_tag = args[6]
+    else:
+        template_tag = 'ubuntudeb'
+
+    if template_tag not in TEMPLATES:
+        parser.error("invalid template_tag %s" % template_tag)
+
+
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
@@ -37,40 +49,46 @@ def main():
 
 
     d = {
+        'arch': arch,
+        'base_dir': base_dir,
+        'buildonly': options.buildonly,
+        'maintainer_email': MAINTAINER_EMAIL,
+        'maintainer_name': MAINTAINER_NAME,
+        'metapackage': metapackage,
         'operating_system': operating_system,
         'platform': platform,
-        'arch': arch,
-        'buildonly': options.buildonly,
-        'maintainer_name': MAINTAINER_NAME,
-        'maintainer_email': MAINTAINER_EMAIL,
         'ros_distro': ros_distro,
-        'workspace': workspace,
-        'tmp_dir': tmp_dir,
-        'base_dir': base_dir,
+        'template_tag': template_tag,
         'timestamp': timestamp,
-        'metapackage': metapackage,
+        'tmp_dir': tmp_dir,
+        'workspace': workspace,
     }
 
     cur_path = os.path.dirname(os.path.abspath(__file__))
     shutil.copytree(cur_path, base_dir)
 
-    with open(TEMPLATE_BOOTSTRAP) as f:
-        tpl = f.read()
-        res = em.expand(tpl, d)
-    with open(TEMPLATE_FILE) as f:
-        tpl = f.read()
-        res += em.expand(tpl, d)
+    res = ""
+    # Load all templates into one string with expansion
+    for t in TEMPLATES[template_tag]:
+        print('v'*80)
+        with open(t) as f:
+            tpl = f.read()
+            print(tpl)
+            res += em.expand(tpl, d)
+        print('^'*80)    
+
     with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
         f2.write(res)
     call(['cat', '%(base_dir)s/Dockerfile' % d])
 
-    tag = 'osrf-jenkins-%(platform)s-%(ros_distro)s-src-pythondeb-%(metapackage)s' % d
+    tag = 'osrf-%(operating_system)s-%(platform)s-%(ros_distro)s-%(template_tag)s-%(metapackage)s' % d
     if options.rebuild:
         cmd = 'sudo docker build -no-cache -t %s %s' % (tag, base_dir)
     else:
         cmd = 'sudo docker build -t %s %s' % (tag, base_dir)
     print(cmd)
     call(cmd.split())
+    #TODO check return code before continuing
     cmd = 'sudo docker run -v %s:%s:rw %s' % (workspace, workspace, tag)
     print(cmd)
     call(cmd.split())
