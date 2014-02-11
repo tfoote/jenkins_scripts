@@ -41,7 +41,13 @@ def main():
     call(cmd.split())
 
 
-    print('OUTPUT DIR %s' % args.workspace)
+    # TODO resolve this hack to work with a non user 1000
+    # account. Docker appears to always output as UID 1000.
+    cmd = "sudo chmod -R o+w %s" % workspace
+    call(cmd.split())
+    
+
+    print('OUTPUT DIR %s' % workspace)
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
 
