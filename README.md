@@ -54,7 +54,7 @@ $ echo "deb http://packages.ros.org/ros/ubuntu raring main" | sudo tee /etc/apt/
 
 Setup the keys:
 ```
-$ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+$ curl http://packages.ros.org/ros.key | sudo apt-key add -
 ```
 
 Then update the APT database with:

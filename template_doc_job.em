@@ -6,9 +6,9 @@ RUN echo deb http://archive.ubuntu.com/ubuntu precise main universe multiverse |
 RUN echo deb http://pkg.jenkins-ci.org/debian binary/ | tee /etc/apt/sources.list.d/jenkins.list
 RUN echo deb http://packages.ros.org/ros/ubuntu precise main | tee /etc/apt/sources.list.d/ros-latest.list
 RUN apt-get update
-RUN apt-get install -q -y wget net-tools python python-yaml
-RUN wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -
-RUN wget -q -O - http://packages.ros.org/ros.key | apt-key add -
+RUN apt-get install -q -y curl net-tools python python-yaml
+RUN curl http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -
+RUN curl http://packages.ros.org/ros.key | apt-key add -
 RUN apt-get update
 RUN apt-get install -q -y apt-utils
 RUN apt-get install -q -y python-rosdistro python-rosinstall
