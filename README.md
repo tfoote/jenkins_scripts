@@ -37,24 +37,24 @@ These Docker scripts also employ a set of Python modules, namely:
 
 On an Ubuntu system, all these Python modules can be installed via the ROS APT repository. First add the appropiate APT sources.line, depending on your version of Ubuntu:
 
-Ubuntu 12.04 (Precise)
+**Ubuntu 12.04 (Precise)**
 ```
 $ echo "deb http://packages.ros.org/ros/ubuntu precise main" | sudo tee /etc/apt/sources.list.d/ros-latest.list'
 ```
 
-Ubuntu 12.10 (Quantal)
+**Ubuntu 12.10 (Quantal)**
 ```
 $ echo "deb http://packages.ros.org/ros/ubuntu quantal main" | sudo tee /etc/apt/sources.list.d/ros-latest.list'
 ```
 
-Ubuntu 13.04 (Raring)
+**Ubuntu 13.04 (Raring)**
 ```
 $ echo "deb http://packages.ros.org/ros/ubuntu raring main" | sudo tee /etc/apt/sources.list.d/ros-latest.list'
 ```
 
 Setup the keys:
 ```
-$ curl http://packages.ros.org/ros.key | sudo apt-key add -
+$ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 ```
 
 Then update the APT database with:
