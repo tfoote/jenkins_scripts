@@ -42,7 +42,12 @@ def main():
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
+    # Hack to work around docker bug where the output is always made as UID 1000
+    cmd = "sudo chmod -R o+w %s" % workspace
+    call(cmd.split())
 
+
+    print('OUTPUT DIR %s' % workspace)
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
 
