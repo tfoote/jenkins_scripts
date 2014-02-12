@@ -71,7 +71,7 @@ def main():
     p = subprocess.Popen(cmd, preexec_fn=restore_sigpipe)
     print(p.communicate())
 
-    shutil.copytree(deploy_path, output_path)
+    shutil.copytree(deploy_path, os.path.join(output_path, 'deploy'))
 
 if __name__ == '__main__':
     main()

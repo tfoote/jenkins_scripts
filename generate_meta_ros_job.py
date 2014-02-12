@@ -91,7 +91,7 @@ def main():
         cmd = 'sudo docker build -t osrf-jenkins-%(platform)s-meta-ros %(base_dir)s' % d
     print(cmd)
     call(cmd.split())
-    cmd = 'sudo docker run -v %(angstrom_path)s:/tmp/angstrom_src:ro -v %(meta_ros_path)s:/tmp/meta_ros_src:ro -v %(log_dir)s:/var/log:rw  -v %(output_dir)s:/home/rosbuild/workspace/setup-scripts/deploy:rw osrf-jenkins-%(platform)s-meta-ros' % d
+    cmd = 'sudo docker run -v %(angstrom_path)s:/tmp/angstrom_src:ro -v %(meta_ros_path)s:/tmp/meta_ros_src:ro -v %(log_dir)s:/var/log:rw  -v %(output_dir)s:/home/rosbuild/workspace/output:rw osrf-jenkins-%(platform)s-meta-ros' % d
     print(cmd)
     call(cmd.split())
     shutil.rmtree(tmp_dir)
