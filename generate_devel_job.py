@@ -9,7 +9,7 @@ import em
 import errno
 
 from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL, BuildException
-import optparse
+import argparse
 
 
 TEMPLATE_FILE = 'template_devel_job.em'
@@ -17,41 +17,36 @@ TEMPLATE_BOOTSTRAP = 'template_bootstrap.em'
 
 
 def main():
-    parser = optparse.OptionParser()
-    parser.add_option("--rebuild", action="store_true", default=False)
-    parser.add_option("--buildonly", action="store_true", default=False)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('operating_system', help='The operating system to use in the Docker container (e.g. ubuntu)')
+    parser.add_argument('platform', help='The release of the container operating system (e.g. precise)')
+    parser.add_argument('arch', help='The architecture of the container image (e.g. i386)')
+    parser.add_argument('ros_distro', help='The ROS distribution to build for (e.g. hydro, indigo)')
+    parser.add_argument('workspace', help='The path on the host filesystem to store the artifacts')
+    parser.add_argument('repo_path', help='The path on the host filesystem to the repository to build')
+    parser.add_argument('--rebuild', help="Discard the Docker cache and rebuild the image", action='store_true')
+    parser.add_argument('--buildonly', action="store_true", default=False)
     (options, args) = parser.parse_args()
-
-    if len(args) != 6:
-        print("Usage: %s operating_system platform arch ros_distro workspace repo_path " % sys.argv[0])
-        raise BuildException("Wrong arguments for devel script")
-
-    operating_system = args[0]
-    platform = args[1]
-    arch = args[2]
-    ros_distro = args[3]
-    workspace = args[4]
-    repo_path = args[5]
 
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
 
     try:
-        os.makedirs(workspace)
+        os.makedirs(args.workspace)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
     # Hack to work around docker bug where the output is always made as UID 1000
-    cmd = "sudo chmod -R o+w %s" % workspace
+    cmd = "sudo chmod -R o+w %s" % args.workspace
     call(cmd.split())
 
 
-    print('OUTPUT DIR %s' % workspace)
+    print('OUTPUT DIR %s' % args.workspace)
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
 
-    repo_sourcespace = os.path.abspath(repo_path)
+    repo_sourcespace = os.path.abspath(args.repo_path)
 
     repo_build_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=False)
     repo_test_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=True)
@@ -59,20 +54,20 @@ def main():
     if 'catkin' not in repo_build_dependencies:
         repo_build_dependencies.append('catkin')
 
-    dependencies = get_package_dependencies(repo_build_dependencies, ros_distro, operating_system, platform)
-    test_dependencies = get_package_dependencies(repo_test_dependencies, ros_distro, operating_system, platform)
+    dependencies = get_package_dependencies(repo_build_dependencies, args.ros_distro, args.operating_system, args.platform)
+    test_dependencies = get_package_dependencies(repo_test_dependencies, args.ros_distro, args.operating_system, args.platform)
 
     test_dependencies = list(set(test_dependencies) - set(dependencies))
 
     d = {
-        'operating_system': operating_system,
-        'platform': platform,
-        'arch': arch,
+        'operating_system': args.operating_system,
+        'platform': args.platform,
+        'arch': args.arch,
         'buildonly': options.buildonly,
         'maintainer_name': MAINTAINER_NAME,
         'maintainer_email': MAINTAINER_EMAIL,
-        'ros_distro': ros_distro,
-        'workspace': workspace,
+        'ros_distro': args.ros_distro,
+        'workspace': args.workspace,
         'tmp_dir': tmp_dir,
         'base_dir': base_dir,
         'timestamp': timestamp,
