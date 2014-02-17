@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import fnmatch
+import errno
 
 MAINTAINER_NAME = "ROS Release"
 MAINTAINER_EMAIL = "noreply@ros.org"
@@ -56,6 +57,19 @@ def copy_test_results(workspace, buildspace, errors=None, prefix='dummy'):
                 os.makedirs(dst)
             call("cp %s %s" % (absfile, dst))
     ensure_test_results(test_results_dir, errors, prefix)
+
+def create_workspace(workspace):
+    try:
+        os.makedirs(workspace)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    if len(os.listdir(workspace) ) > 0:
+        raise BuildException("output workspace [%s] is not empty." % workspace)
+
+    # Hack to work around docker bug where the output is always made as UID 1000
+    cmd = "sudo chmod -R o+w %s" % workspace
+    call(cmd)
 
 
 def ensure_test_results(test_results_dir, errors=None, prefix='dummy'):

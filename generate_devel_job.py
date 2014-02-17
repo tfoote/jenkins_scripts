@@ -6,9 +6,8 @@ import tempfile
 from subprocess import call
 import datetime
 import em
-import errno
 
-from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL, BuildException
+from common import create_workspace, get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL, BuildException
 import optparse
 
 
@@ -37,15 +36,7 @@ def main():
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
 
-    try:
-        os.makedirs(workspace)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-    # Hack to work around docker bug where the output is always made as UID 1000
-    cmd = "sudo chmod -R o+w %s" % workspace
-    call(cmd.split())
-
+    create_workspace(workspace)
 
     print('OUTPUT DIR %s' % workspace)
     print('TEMPORARY DIR %s' % tmp_dir)

@@ -9,7 +9,7 @@ from subprocess import call
 import datetime
 import em
 
-from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL
+from common import create_workspace, get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL
 import optparse
 
 TEMPLATES = {
@@ -39,6 +39,8 @@ def main():
     if template_tag not in TEMPLATES:
         parser.error("invalid template_tag %s" % template_tag)
 
+
+    create_workspace(workspace)
 
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
