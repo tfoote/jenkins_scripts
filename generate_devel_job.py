@@ -20,7 +20,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('operating_system', help='The operating system to use in the Docker container (e.g. ubuntu)')
     parser.add_argument('platform', help='The release of the container operating system (e.g. precise)')
-    parser.add_argument('arch', help='The architecture of the container image (e.g. i386)')
     parser.add_argument('ros_distro', help='The ROS distribution to build for (e.g. hydro, indigo)')
     parser.add_argument('workspace', help='The path on the host filesystem to store the artifacts')
     parser.add_argument('repo_path', help='The path on the host filesystem to the repository to build')
@@ -62,7 +61,6 @@ def main():
     d = {
         'operating_system': args.operating_system,
         'platform': args.platform,
-        'arch': args.arch,
         'buildonly': args.buildonly,
         'maintainer_name': MAINTAINER_NAME,
         'maintainer_email': MAINTAINER_EMAIL,

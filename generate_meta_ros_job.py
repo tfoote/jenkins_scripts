@@ -18,7 +18,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('operating_system', help='The operating system to use in the Docker container (e.g. ubuntu)')
     parser.add_argument('platform', help='The release of the container operating system (e.g. precise)')
-    parser.add_argument('arch', help='The architecture of the container image (e.g. i386)')
     parser.add_argument('workspace', help='The path on the host filesystem to store the artifacts')
     parser.add_argument('angstrom_path', help='The path on the host filesystem to a copy of the Angstrom distribution')
     parser.add_argument('meta_ros_path', help='The path on the host filesystem to a copy of the meta-ros repository')
@@ -56,7 +55,6 @@ def main():
     d = {
         'operating_system': args.operating_system,
         'platform': args.platform,
-        'arch': args.arch,
         'maintainer_name': MAINTAINER_NAME,
         'maintainer_email': MAINTAINER_EMAIL,
         'tmp_dir': tmp_dir,
