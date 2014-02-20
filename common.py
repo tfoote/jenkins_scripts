@@ -296,3 +296,23 @@ def get_package_dependencies(repo_build_dependencies, ros_distro, os_name, os_ve
         inst_key, rule = d.get_rule_for_platform(os_name, os_version, installer_keys, default_key)
         pkg_deps.extend(installer.resolve(rule))
     return pkg_deps
+
+
+def which(program):
+    'Return the path to a program. Taken from http://stackoverflow.com/a/377028'
+    import os
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
