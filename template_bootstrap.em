@@ -3,7 +3,11 @@ MAINTAINER @maintainer_name @maintainer_email
 
 VOLUME ["/var/cache/apt/archives"]
 ENV DEBIAN_FRONTEND noninteractive
+@[if operating_system == 'ubuntu']
 RUN echo deb http://archive.ubuntu.com/ubuntu @platform main universe multiverse | tee /etc/apt/sources.list
+@[else if operating_system == 'debian']
+RUN echo deb http://http.debian.net/debian @platform main contrib non-free | tee /etc/apt/sources.list
+@[end if]
 RUN apt-get update
 RUN apt-get install -q -y curl net-tools python python-yaml
 RUN curl http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -
