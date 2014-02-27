@@ -54,8 +54,6 @@ def main():
         'bitbake_path': os.path.abspath(args.bitbake_path),
         'meta_ros_path': os.path.abspath(args.meta_ros_path),
         'workspace_path': workspace_path,
-        'log_path': log_path,
-        'output_path': output_path,
         'build_path': build_path,
         'docker_path': DOCKER_PATH,
     }

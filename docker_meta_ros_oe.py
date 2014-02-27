@@ -47,9 +47,14 @@ def main():
         tpl = f.read()
         res = em.expand(tpl, d)
 
-    print(res)
+    conf_path = os.path.join(base_path, 'build', 'conf')
+    try:
+        os.makedirs(conf_path)
+    except OSError as ose:
+        if ose.errno != errno.EEXIST:
+            raise
 
-    with open(os.path.join(base_path, 'build', 'conf', 'bblayers.conf'), 'w') as f2:
+    with open(os.path.join(conf_path, 'bblayers.conf'), 'w') as f2:
         f2.write(res)
 
     script_txt = '''#!/bin/bash
