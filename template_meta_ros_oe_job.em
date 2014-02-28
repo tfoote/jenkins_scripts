@@ -22,6 +22,7 @@ RUN apt-get install -q -y texi2html
 RUN apt-get install -q -y subversion
 RUN apt-get install -q -y gettext
 RUN apt-get install -q -y python-empy
+RUN apt-get install -q -y libsdl1.2-dev
 RUN echo dash dash/sh boolean false | debconf-set-selections
 RUN dpkg-reconfigure dash
 RUN useradd -d /home/rosbuild -m -s /bin/bash rosbuild
