@@ -8,8 +8,9 @@ import tempfile
 from subprocess import call
 import datetime
 import em
+import errno
 
-from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL
+from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL, BuildException, which
 import optparse
 
 TEMPLATES = {
@@ -42,11 +43,23 @@ def main():
     if template_tag not in TEMPLATES:
         parser.error("invalid template_tag %s" % template_tag)
 
+    try:
+        os.makedirs(workspace)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    # TODO resolve this hack to work with a non user 1000
+    # account. Docker appears to always output as UID 1000.
+    cmd = "sudo chmod -R o+w %s" % workspace
+    call(cmd.split())
+    
 
     tmp_dir = tempfile.mkdtemp()
     base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
 
+    print('OUTPUT DIR %s' % workspace)
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
 
@@ -99,4 +112,15 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # global try
+    try:
+        main()
+        print("devel script finished cleanly.")
+
+    # global catch
+    except BuildException as ex:
+        print(ex.msg)
+
+    except Exception as ex:
+        print("devel script failed. Check out the console output above for details.")
+        raise
