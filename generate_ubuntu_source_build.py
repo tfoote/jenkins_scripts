@@ -35,44 +35,28 @@ def main():
     subparsers = parser.add_subparsers(dest='subparser_name')
 
     source_parser = subparsers.add_parser('source')
-    source_parser.add_argument('workspace')
+    source_parser.add_argument('workspace') # todo make optional, autogenerate if unset, probably generic option too
     source_parser.add_argument('metapackage')
     source_parser.add_argument('--template', default='ubuntudeb', choices=TEMPLATES)
-    source_parser.set_defaults(func=source_build)
+    source_parser.set_defaults(func=source_build_generate_dockerfile_template)
 
     args = parser.parse_args()
-    args.func(args)
 
-def source_build(args):
+    #Generate the docker file based on the arguments
+    (docker_file_string, tag) = args.func(args)
+    #TODO add generic catch here for users to throw on invlaid args
 
-    #print(args)
-    #exit(0)
+    # Setup the temporary directories and execute. 
+    run_docker(args, docker_file_string, tag)
 
+def source_build_generate_dockerfile_template(args):
     workspace = args.workspace
     metapackage = args.metapackage
     ros_distro = args.ros_distro
     template_tag = args.template
 
-    # Create the workspace if it doesn't already exist
-    try:
-        os.makedirs(workspace)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
 
-    # TODO resolve this hack to work with a non user 1000
-    # account. Docker appears to always output as UID 1000.
-    cmd = "sudo chmod -R o+w %s" % workspace
-    call(cmd.split())
-    
-
-    tmp_dir = tempfile.mkdtemp()
-    base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
     timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
-
-    print('OUTPUT DIR %s' % workspace)
-    print('TEMPORARY DIR %s' % tmp_dir)
-    print('BASE DIR %s' % base_dir)
 
     #Generation substitution dictionary
     d = {
@@ -88,7 +72,6 @@ def source_build(args):
         'workspace': workspace,
     }
 
-
     res = ""
     # Load all templates into one string with expansion
     for t in TEMPLATES[template_tag]:
@@ -98,6 +81,35 @@ def source_build(args):
             print(tpl)
             res += em.expand(tpl, d)
         print('^'*80)    
+    
+    # build and tag the image
+    tag = '-'.join(['osrf', template_tag, args.os, args.platform, args.ros_distro, args.metapackage])
+
+    return res, tag
+
+
+def run_docker(args, docker_file_string, tag):
+    #TODO add timing output
+    workspace = args.workspace
+
+    # Create the workspace if it doesn't already exist
+    try:
+        os.makedirs(workspace)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    # TODO resolve this hack to work with a non user 1000
+    # account. Docker appears to always output as UID 1000.
+    cmd = "sudo chmod -R o+w %s" % workspace
+    call(cmd.split())
+    
+    tmp_dir = tempfile.mkdtemp()
+    base_dir = os.path.join(tmp_dir, 'jenkins_scripts')
+
+    print('OUTPUT DIR %s' % workspace)
+    print('TEMPORARY DIR %s' % tmp_dir)
+    print('BASE DIR %s' % base_dir)
 
     # Copy the contents of this file's directory into the base_dir to make scripts available
     # TODO explicitly whitelist and install these scripts
@@ -106,12 +118,9 @@ def source_build(args):
 
     #write the results to file
     with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
-        f2.write(res)
+        f2.write(docker_file_string)
     call(['cat', '%s/Dockerfile' % base_dir])
 
-
-    # build and tag the image
-    tag = template_tag+'-osrf-%(operating_system)s-%(platform)s-%(ros_distro)s-%(metapackage)s' % d
     if args.rebuild:
         cmd = 'sudo docker build -no-cache -t %s %s' % (tag, base_dir)
     else:
@@ -125,6 +134,7 @@ def source_build(args):
     print(cmd)
     call(cmd.split())
     shutil.rmtree(tmp_dir)
+    return True
 
 
 if __name__ == '__main__':
