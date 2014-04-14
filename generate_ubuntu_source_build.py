@@ -47,7 +47,7 @@ def main():
     devel_parser.add_argument('workspace') # todo make optional, autogenerate if unset, probably generic option too
     devel_parser.add_argument('repo_path')
     devel_parser.add_argument('--template', default='ubuntudeb', choices=DEVEL_TEMPLATES)
-    source_parser.set_defaults(func=source_build_generate_dockerfile_template)
+    devel_parser.set_defaults(func=devel_build_generate_dockerfile_template)
 
     args = parser.parse_args()
 
@@ -107,14 +107,16 @@ def devel_build_generate_dockerfile_template(args):
 
     repo_sourcespace = os.path.abspath(args.repo_path)
 
+    repo_name = os.path.basename(repo_sourcespace)
+
     repo_build_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=False)
     repo_test_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=True)
     # ensure that catkin gets installed, for non-catkin packages so that catkin_make_isolated is available
     if 'catkin' not in repo_build_dependencies:
         repo_build_dependencies.append('catkin')
 
-    dependencies = get_package_dependencies(repo_build_dependencies, args.ros_distro, args.operating_system, args.platform)
-    test_dependencies = get_package_dependencies(repo_test_dependencies, args.ros_distro, args.operating_system, args.platform)
+    dependencies = get_package_dependencies(repo_build_dependencies, args.ros_distro, args.os, args.platform)
+    test_dependencies = get_package_dependencies(repo_test_dependencies, args.ros_distro, args.os, args.platform)
 
     test_dependencies = list(set(test_dependencies) - set(dependencies))
 
@@ -130,14 +132,13 @@ def devel_build_generate_dockerfile_template(args):
         'repo_sourcespace': repo_sourcespace,
         'dependencies': dependencies,
         'test_dependencies': test_dependencies,
-        'repo_name': os.path.basename(repo_sourcespace),
-        'docker_path': DOCKER_PATH,
+        'repo_name': repo_name,
     }
 
-    res = substitute_templates(DEVEL_TEMPLATES[template_tag], d)
+    res = substitute_templates(DEVEL_TEMPLATES[args.template], d)
 
 
-    tag = '-'.join(['osrf', 'devel', args.os, args.platfor, args.ros_distro, repo_name, workspace])
+    tag = '-'.join(['osrf', 'devel', args.os, args.platform, args.ros_distro, repo_name, args.template])
 
     return res, tag
 
