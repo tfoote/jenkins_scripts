@@ -32,11 +32,21 @@ def main():
     parser.add_argument("--rebuild", action="store_true", default=False)
     parser.add_argument("--buildonly", action="store_true", default=False)
     parser.add_argument('ros_distro')
-    parser.add_argument('workspace')
-    parser.add_argument('metapackage')
-    parser.add_argument('--template', default='ubuntudeb', choices=TEMPLATES)
+    subparsers = parser.add_subparsers(dest='subparser_name')
+
+    source_parser = subparsers.add_parser('source')
+    source_parser.add_argument('workspace')
+    source_parser.add_argument('metapackage')
+    source_parser.add_argument('--template', default='ubuntudeb', choices=TEMPLATES)
+    source_parser.set_defaults(func=source_build)
 
     args = parser.parse_args()
+    args.func(args)
+
+def source_build(args):
+
+    #print(args)
+    #exit(0)
 
     workspace = args.workspace
     metapackage = args.metapackage
@@ -64,10 +74,9 @@ def main():
     print('TEMPORARY DIR %s' % tmp_dir)
     print('BASE DIR %s' % base_dir)
 
-
+    #Generation substitution dictionary
     d = {
         'arch': args.arch,
-        'base_dir': base_dir,
         'buildonly': args.buildonly,
         'maintainer_email': MAINTAINER_EMAIL,
         'maintainer_name': MAINTAINER_NAME,
@@ -75,14 +84,10 @@ def main():
         'operating_system': args.os,
         'platform': args.platform,
         'ros_distro': ros_distro,
-        'template_tag': template_tag,
         'timestamp': timestamp,
-        'tmp_dir': tmp_dir,
         'workspace': workspace,
     }
 
-    cur_path = os.path.dirname(os.path.abspath(__file__))
-    shutil.copytree(cur_path, base_dir)
 
     res = ""
     # Load all templates into one string with expansion
@@ -94,11 +99,19 @@ def main():
             res += em.expand(tpl, d)
         print('^'*80)    
 
+    # Copy the contents of this file's directory into the base_dir to make scripts available
+    # TODO explicitly whitelist and install these scripts
+    cur_path = os.path.dirname(os.path.abspath(__file__))
+    shutil.copytree(cur_path, base_dir)
+
+    #write the results to file
     with open(os.path.join(base_dir, 'Dockerfile'), 'w') as f2:
         f2.write(res)
-    call(['cat', '%(base_dir)s/Dockerfile' % d])
+    call(['cat', '%s/Dockerfile' % base_dir])
 
-    tag = 'osrf-%(operating_system)s-%(platform)s-%(ros_distro)s-%(template_tag)s-%(metapackage)s' % d
+
+    # build and tag the image
+    tag = template_tag+'-osrf-%(operating_system)s-%(platform)s-%(ros_distro)s-%(metapackage)s' % d
     if args.rebuild:
         cmd = 'sudo docker build -no-cache -t %s %s' % (tag, base_dir)
     else:
@@ -106,6 +119,8 @@ def main():
     print(cmd)
     call(cmd.split())
     #TODO check return code before continuing
+
+    # Rnn the tagged image 
     cmd = 'sudo docker run -v %s:%s:rw %s' % (workspace, workspace, tag)
     print(cmd)
     call(cmd.split())
