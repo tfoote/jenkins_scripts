@@ -20,19 +20,22 @@ TEMPLATES = {
 
 def main():
     parser = optparse.OptionParser()
+    parser.add_option('-o', '--os', default='ubuntu', dest='os')
+    parser.add_option('-p', '--platform', default='precise', dest='platform')
+    parser.add_option('-a', '--arch', default='amd64', dest='arch')
     parser.add_option("--rebuild", action="store_true", default=False)
     parser.add_option("--buildonly", action="store_true", default=False)
     (options, args) = parser.parse_args()
 
-    operating_system = args[0]
-    platform = args[1]
-    arch = args[2]
-    ros_distro = args[3]
-    workspace = args[4]
-    metapackage = args[5]
+    #operating_system = args[0]
+    #platform = args[1]
+    #arch = args[2]
+    ros_distro = args[0]
+    workspace = args[1]
+    metapackage = args[2]
 
-    if len(args) == 7:
-        template_tag = args[6]
+    if len(args) == 4:
+        template_tag = args[3]
     else:
         template_tag = 'ubuntudeb'
 
@@ -49,14 +52,14 @@ def main():
 
 
     d = {
-        'arch': arch,
+        'arch': options.arch,
         'base_dir': base_dir,
         'buildonly': options.buildonly,
         'maintainer_email': MAINTAINER_EMAIL,
         'maintainer_name': MAINTAINER_NAME,
         'metapackage': metapackage,
-        'operating_system': operating_system,
-        'platform': platform,
+        'operating_system': options.os,
+        'platform': options.platform,
         'ros_distro': ros_distro,
         'template_tag': template_tag,
         'timestamp': timestamp,
