@@ -13,12 +13,15 @@ import errno
 from common import get_dependencies, get_package_dependencies, MAINTAINER_NAME, MAINTAINER_EMAIL, BuildException, which
 import argparse
 
-TEMPLATES = {
+SOURCE_TEMPLATES = {
     'ubuntudeb': [ 'template_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
     'ubuntupip': [ 'from_source/templates/pip_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
     'fedora': [ 'from_source/templates/fedora_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
     }
 
+DEVEL_TEMPLATES = {
+    'ubuntudeb': [ 'template_bootstrap.em', 'template_devel_job.em'],
+    }
 
 available_arches = ['amd64', 'i386']
 
@@ -37,7 +40,13 @@ def main():
     source_parser = subparsers.add_parser('source')
     source_parser.add_argument('workspace') # todo make optional, autogenerate if unset, probably generic option too
     source_parser.add_argument('metapackage')
-    source_parser.add_argument('--template', default='ubuntudeb', choices=TEMPLATES)
+    source_parser.add_argument('--template', default='ubuntudeb', choices=SOURCE_TEMPLATES)
+    source_parser.set_defaults(func=source_build_generate_dockerfile_template)
+
+    devel_parser = subparsers.add_parser('devel')
+    devel_parser.add_argument('workspace') # todo make optional, autogenerate if unset, probably generic option too
+    devel_parser.add_argument('repo_path')
+    devel_parser.add_argument('--template', default='ubuntudeb', choices=DEVEL_TEMPLATES)
     source_parser.set_defaults(func=source_build_generate_dockerfile_template)
 
     args = parser.parse_args()
@@ -72,20 +81,66 @@ def source_build_generate_dockerfile_template(args):
         'workspace': workspace,
     }
 
-    res = ""
-    # Load all templates into one string with expansion
-    for t in TEMPLATES[template_tag]:
-        print('v'*80)
-        with open(t) as f:
-            tpl = f.read()
-            print(tpl)
-            res += em.expand(tpl, d)
-        print('^'*80)    
+    res = substitute_templates(SOURCE_TEMPLATES[template_tag], d)
     
     # build and tag the image
     tag = '-'.join(['osrf', template_tag, args.os, args.platform, args.ros_distro, args.metapackage])
 
     return res, tag
+
+def substitute_templates(templates, sub_dict):
+    res = ""
+    # Load all templates into one string with expansion
+    for t in templates:
+        print('v'*80)
+        with open(t) as f:
+            tpl = f.read()
+            print(tpl)
+            res += em.expand(tpl, sub_dict)
+        print('^'*80)    
+    return res
+
+
+def devel_build_generate_dockerfile_template(args):
+
+    timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
+
+    repo_sourcespace = os.path.abspath(args.repo_path)
+
+    repo_build_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=False)
+    repo_test_dependencies = get_dependencies(repo_sourcespace, build_depends=True, test_depends=True)
+    # ensure that catkin gets installed, for non-catkin packages so that catkin_make_isolated is available
+    if 'catkin' not in repo_build_dependencies:
+        repo_build_dependencies.append('catkin')
+
+    dependencies = get_package_dependencies(repo_build_dependencies, args.ros_distro, args.operating_system, args.platform)
+    test_dependencies = get_package_dependencies(repo_test_dependencies, args.ros_distro, args.operating_system, args.platform)
+
+    test_dependencies = list(set(test_dependencies) - set(dependencies))
+
+    d = {
+        'operating_system': args.os,
+        'platform': args.platform,
+        'buildonly': args.buildonly,
+        'maintainer_name': MAINTAINER_NAME,
+        'maintainer_email': MAINTAINER_EMAIL,
+        'ros_distro': args.ros_distro,
+        'workspace': args.workspace,
+        'timestamp': timestamp,
+        'repo_sourcespace': repo_sourcespace,
+        'dependencies': dependencies,
+        'test_dependencies': test_dependencies,
+        'repo_name': os.path.basename(repo_sourcespace),
+        'docker_path': DOCKER_PATH,
+    }
+
+    res = substitute_templates(DEVEL_TEMPLATES[template_tag], d)
+
+
+    tag = '-'.join(['osrf', 'devel', args.os, args.platfor, args.ros_distro, repo_name, workspace])
+
+    return res, tag
+
 
 
 def run_docker(args, docker_file_string, tag):
