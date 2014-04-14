@@ -52,11 +52,11 @@ def main():
     args = parser.parse_args()
 
     #Generate the docker file based on the arguments
-    (docker_file_string, tag) = args.func(args)
+    (docker_file_string, tag, mount_string) = args.func(args)
     #TODO add generic catch here for users to throw on invlaid args
 
     # Setup the temporary directories and execute. 
-    run_docker(args, docker_file_string, tag)
+    run_docker(args, docker_file_string, tag, mount_string)
 
 def source_build_generate_dockerfile_template(args):
     workspace = args.workspace
@@ -86,7 +86,9 @@ def source_build_generate_dockerfile_template(args):
     # build and tag the image
     tag = '-'.join(['osrf', template_tag, args.os, args.platform, args.ros_distro, args.metapackage])
 
-    return res, tag
+    mount_string = '-v %(workspace)s:%(workspace)s:rw' % d
+
+    return res, tag, mount_string
 
 def substitute_templates(templates, sub_dict):
     res = ""
@@ -140,11 +142,13 @@ def devel_build_generate_dockerfile_template(args):
 
     tag = '-'.join(['osrf', 'devel', args.os, args.platform, args.ros_distro, repo_name, args.template])
 
-    return res, tag
+    mount_string = '-v %(repo_sourcespace)s:/tmp/src:ro -v %(workspace)s:%(workspace)s:rw' % d
+
+    return res, tag, mount_string
 
 
 
-def run_docker(args, docker_file_string, tag):
+def run_docker(args, docker_file_string, tag, mount_string):
     #TODO add timing output
     workspace = args.workspace
 
@@ -186,7 +190,7 @@ def run_docker(args, docker_file_string, tag):
     #TODO check return code before continuing
 
     # Rnn the tagged image 
-    cmd = 'sudo docker run -v %s:%s:rw %s' % (workspace, workspace, tag)
+    cmd = 'sudo docker run %s %s' % (mount_string, tag)
     print(cmd)
     call(cmd.split())
     shutil.rmtree(tmp_dir)
@@ -197,12 +201,12 @@ if __name__ == '__main__':
     # global try
     try:
         main()
-        print("devel script finished cleanly.")
+        print("docker finished cleanly.")
 
     # global catch
     except BuildException as ex:
         print(ex.msg)
 
     except Exception as ex:
-        print("devel script failed. Check out the console output above for details.")
+        print("docker script failed. Check out the console output above for details.")
         raise
