@@ -35,28 +35,44 @@ def main():
     parser.add_argument("--rebuild", action="store_true", default=False)
     parser.add_argument("--buildonly", action="store_true", default=False)
     parser.add_argument('ros_distro')
+    parser.add_argument('-w', '--workspace', dest='workspace', default=None)
     subparsers = parser.add_subparsers(dest='subparser_name')
 
     source_parser = subparsers.add_parser('source')
-    source_parser.add_argument('workspace') # todo make optional, autogenerate if unset, probably generic option too
     source_parser.add_argument('metapackage')
     source_parser.add_argument('--template', default='ubuntudeb', choices=SOURCE_TEMPLATES)
     source_parser.set_defaults(func=source_build_generate_dockerfile_template)
 
     devel_parser = subparsers.add_parser('devel')
-    devel_parser.add_argument('workspace') # todo make optional, autogenerate if unset, probably generic option too
     devel_parser.add_argument('repo_path')
     devel_parser.add_argument('--template', default='ubuntudeb', choices=DEVEL_TEMPLATES)
     devel_parser.set_defaults(func=devel_build_generate_dockerfile_template)
 
     args = parser.parse_args()
 
-    #Generate the docker file based on the arguments
-    (docker_file_string, tag, mount_string) = args.func(args)
-    #TODO add generic catch here for users to throw on invlaid args
 
-    # Setup the temporary directories and execute. 
-    run_docker(args, docker_file_string, tag, mount_string)
+    generated_workspace = False
+    if not args.workspace:
+        generated_workspace = True
+        args.workspace = tempfile.mkdtemp()
+        print("Automatically generated workspace %s" % args.workspace)
+
+    try:
+        #Generate the docker file based on the arguments
+        (docker_file_string, tag, mount_string) = args.func(args)
+        #TODO add generic catch here for users to throw on invlaid args
+
+        # Setup the temporary directories and execute. 
+        run_docker(args, docker_file_string, tag, mount_string)
+        
+        #TODO return permissions to current user
+
+    finally:
+        if generated_workspace:
+            print("Cleaning up utomatically generated workspace %s. To debug specify a --workspace to persist the build." % args.workspace)
+            #shutil.rmtree(args.workspace)
+            # root permissions output, need to sudo rm
+            call(['sudo', 'rm', '-rf', args.workspace])
 
 def source_build_generate_dockerfile_template(args):
     workspace = args.workspace
