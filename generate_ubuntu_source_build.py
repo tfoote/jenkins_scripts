@@ -55,7 +55,7 @@ def main():
     if not args.workspace:
         generated_workspace = True
         args.workspace = tempfile.mkdtemp()
-        print("Automatically generated workspace %s" % args.workspace)
+        print("Automatically generated workspace %s To debug specify a --workspace to persist the build." % args.workspace)
 
     try:
         #Generate the docker file based on the arguments
@@ -69,7 +69,7 @@ def main():
 
     finally:
         if generated_workspace:
-            print("Cleaning up utomatically generated workspace %s. To debug specify a --workspace to persist the build." % args.workspace)
+            print("Cleaning up automatically generated workspace %s. To debug specify a --workspace to persist the build." % args.workspace)
             #shutil.rmtree(args.workspace)
             # root permissions output, need to sudo rm
             call(['sudo', 'rm', '-rf', args.workspace])
