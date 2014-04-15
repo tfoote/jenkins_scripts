@@ -29,23 +29,31 @@ available_arches = ['amd64', 'i386']
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--os', default='ubuntu', dest='os')
-    parser.add_argument('-p', '--platform', default='precise', dest='platform')
-    parser.add_argument('-a', '--arch', default='amd64', dest='arch', choices=available_arches)
-    parser.add_argument("--rebuild", action="store_true", default=False)
-    parser.add_argument("--buildonly", action="store_true", default=False)
+    parser.add_argument('-o', '--os', default='ubuntu', dest='os',
+                        help='The operating system to use in the Docker container (e.g. ubuntu)')
+    parser.add_argument('-p', '--platform', default='precise', dest='platform',
+                        help='The release of the container operating system (e.g. precise)')
+    parser.add_argument('-a', '--arch', default='amd64', dest='arch', choices=available_arches,
+                        help='The architecture for the docher container')
+    parser.add_argument("--rebuild", action="store_true", default=False,
+                        help="Discard the Docker cache and rebuild the image")
     parser.add_argument('ros_distro')
-    parser.add_argument('-w', '--workspace', dest='workspace', default=None)
+    parser.add_argument('-w', '--workspace', dest='workspace', default=None,
+                        help='The path on the host filesystem to store the artifacts')
     subparsers = parser.add_subparsers(dest='subparser_name')
 
     source_parser = subparsers.add_parser('source')
     source_parser.add_argument('metapackage')
     source_parser.add_argument('--template', default='ubuntudeb', choices=SOURCE_TEMPLATES)
+    source_parser.add_argument("--buildonly", action="store_true", default=False,
+                               help="Do not run unit tests just run the build.")
     source_parser.set_defaults(func=source_build_generate_dockerfile_template)
-
+    
     devel_parser = subparsers.add_parser('devel')
     devel_parser.add_argument('repo_path')
     devel_parser.add_argument('--template', default='ubuntudeb', choices=DEVEL_TEMPLATES)
+    devel_parser.add_argument("--buildonly", action="store_true", default=False,
+                              help="Do not run unit tests just run the build.")
     devel_parser.set_defaults(func=devel_build_generate_dockerfile_template)
 
     args = parser.parse_args()
