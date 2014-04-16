@@ -118,12 +118,9 @@ def substitute_templates(templates, sub_dict):
     res = ""
     # Load all templates into one string with expansion
     for t in templates:
-        print('v'*80)
         with open(t) as f:
             tpl = f.read()
-            print(tpl)
             res += em.expand(tpl, sub_dict)
-        print('^'*80)    
     return res
 
 
