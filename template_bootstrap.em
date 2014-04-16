@@ -10,8 +10,8 @@ RUN echo deb http://http.debian.net/debian @platform main contrib non-free | tee
 @[end if]
 RUN apt-get update
 RUN apt-get install -q -y curl net-tools python python-yaml
-RUN curl http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -
-RUN curl http://packages.ros.org/ros.key | apt-key add -
+RUN curl -s --retry 5 http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -
+RUN curl -s --retry 5 http://packages.ros.org/ros.key | apt-key add -
 RUN echo deb http://pkg.jenkins-ci.org/debian binary/ | tee /etc/apt/sources.list.d/jenkins.list
 RUN echo deb http://packages.ros.org/ros-shadow-fixed/ubuntu @platform main | tee /etc/apt/sources.list.d/ros-latest.list
 RUN apt-get update
