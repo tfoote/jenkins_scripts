@@ -26,12 +26,18 @@ DEVEL_TEMPLATES = {
 available_arches = ['amd64', 'i386']
 
 
+DEFAULT_PLATFORMS = {
+    'groovy': 'precise',
+    'hydro': 'precise',
+    'indigo': 'saucy',
+    }
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--os', default='ubuntu', dest='os',
                         help='The operating system to use in the Docker container (e.g. ubuntu)')
-    parser.add_argument('-p', '--platform', default='precise', dest='platform',
+    parser.add_argument('-p', '--platform', default=None, dest='platform',
                         help='The release of the container operating system (e.g. precise)')
     parser.add_argument('-a', '--arch', default='amd64', dest='arch', choices=available_arches,
                         help='The architecture for the docher container')
@@ -58,6 +64,21 @@ def main():
 
     args = parser.parse_args()
 
+    if not args.platform:
+        if args.os != 'ubuntu':
+            parser.parse_error("platform is required if not using ubuntu.")
+        if args.ros_distro in DEFAULT_PLATFORMS:
+            args.platform = DEFAULT_PLATFORMS[args.ros_distro]
+        else:
+            parser.parse_error("platform is required if not on a default platform. %s" %
+                               DEFAULT_PLATFORMS)
+
+    print("Running job \"%s\" with parameters:\n  OS: %s\n  Distro: %s\n  Arch: %s\n\n" % (
+            args.subparser_name,
+            args.os,
+            args.platform,
+            args.arch,
+            ))
 
     generated_workspace = False
     if not args.workspace:
