@@ -3,6 +3,7 @@ MAINTAINER @maintainer_name @maintainer_email
 
 VOLUME ["/var/cache/apt/archives"]
 ENV DEBIAN_FRONTEND noninteractive
+@[if http_proxy]ENV http_proxy @http_proxy@[end if]
 @[if operating_system == 'ubuntu']
 RUN echo deb http://archive.ubuntu.com/ubuntu @platform main universe multiverse | tee /etc/apt/sources.list
 @[else if operating_system == 'debian']

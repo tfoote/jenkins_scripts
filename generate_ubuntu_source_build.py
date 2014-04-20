@@ -43,6 +43,8 @@ def main():
                         help='The architecture for the docher container')
     parser.add_argument("--rebuild", action="store_true", default=False,
                         help="Discard the Docker cache and rebuild the image")
+    parser.add_argument('--http_proxy', dest='http_proxy', default=None,
+                        help='A http_proxy to pass into docker')
     parser.add_argument('ros_distro')
     parser.add_argument('-w', '--workspace', dest='workspace', default=None,
                         help='The path on the host filesystem to store the artifacts')
@@ -116,6 +118,7 @@ def source_build_generate_dockerfile_template(args):
     d = {
         'arch': args.arch,
         'buildonly': args.buildonly,
+        'http_proxy': args.http_proxy,
         'maintainer_email': MAINTAINER_EMAIL,
         'maintainer_name': MAINTAINER_NAME,
         'metapackage': metapackage,
