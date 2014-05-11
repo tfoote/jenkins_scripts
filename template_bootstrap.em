@@ -5,9 +5,11 @@ VOLUME ["/var/cache/apt/archives"]
 ENV DEBIAN_FRONTEND noninteractive
 @[if http_proxy]ENV http_proxy @http_proxy@[end if]
 @[if operating_system == 'ubuntu']
-RUN echo deb http://archive.ubuntu.com/ubuntu @platform main universe multiverse | tee /etc/apt/sources.list
+# Add multiverse
+RUN echo deb http://archive.ubuntu.com/ubuntu @platform multiverse | tee -a /etc/apt/sources.list
 @[else if operating_system == 'debian']
-RUN echo deb http://http.debian.net/debian @platform main contrib non-free | tee /etc/apt/sources.list
+# Add contrib and non-free to debian images
+RUN echo deb http://http.debian.net/debian @platform contrib non-free | tee -a /etc/apt/sources.list
 @[end if]
 RUN apt-get update
 RUN apt-get install -q -y curl net-tools python python-yaml
