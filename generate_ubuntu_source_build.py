@@ -118,6 +118,7 @@ def source_build_generate_dockerfile_template(args):
     d = {
         'arch': args.arch,
         'buildonly': args.buildonly,
+        'http_proxy': args.http_proxy,
         'maintainer_email': MAINTAINER_EMAIL,
         'maintainer_name': MAINTAINER_NAME,
         'metapackage': metapackage,
