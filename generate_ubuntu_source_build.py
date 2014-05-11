@@ -5,7 +5,7 @@ import sys
 import shutil
 import os
 import tempfile
-from subprocess import call
+from subprocess import call, check_call
 import datetime
 import em
 import errno
@@ -118,7 +118,6 @@ def source_build_generate_dockerfile_template(args):
     d = {
         'arch': args.arch,
         'buildonly': args.buildonly,
-        'http_proxy': args.http_proxy,
         'maintainer_email': MAINTAINER_EMAIL,
         'maintainer_name': MAINTAINER_NAME,
         'metapackage': metapackage,
@@ -171,6 +170,7 @@ def devel_build_generate_dockerfile_template(args):
         'operating_system': args.os,
         'platform': args.platform,
         'buildonly': args.buildonly,
+        'http_proxy': args.http_proxy,
         'maintainer_name': MAINTAINER_NAME,
         'maintainer_email': MAINTAINER_EMAIL,
         'ros_distro': args.ros_distro,
@@ -231,15 +231,17 @@ def run_docker(args, docker_file_string, tag, mount_string):
     else:
         cmd = 'sudo docker build -t %s %s' % (tag, base_dir)
     print(cmd)
-    call(cmd.split())
+    check_call(cmd.split())
     #TODO check return code before continuing
 
     # Rnn the tagged image 
     cmd = 'sudo docker run %s %s' % (mount_string, tag)
     print(cmd)
-    call(cmd.split())
-    shutil.rmtree(tmp_dir)
-    return True
+    try:
+        result = call(cmd.split()) == 0
+    finally:
+        shutil.rmtree(tmp_dir)
+    return result
 
 
 if __name__ == '__main__':
