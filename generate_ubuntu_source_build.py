@@ -88,13 +88,23 @@ def main():
         args.workspace = tempfile.mkdtemp()
         print("Automatically generated workspace %s To debug specify a --workspace to persist the build." % args.workspace)
 
+
     try:
         #Generate the docker file based on the arguments
-        (docker_file_string, tag, mount_string) = args.func(args)
+        try:
+            (docker_file_string, tag, mount_string) = args.func(args)
+        except:
+            print("Docker build failed, aborting")
+            raise
         #TODO add generic catch here for users to throw on invlaid args
-
+        
         # Setup the temporary directories and execute. 
-        run_docker(args, docker_file_string, tag, mount_string)
+        success = False
+        try:
+            success = run_docker(args, docker_file_string, tag, mount_string)
+        except:
+            print("Docker run failed.")
+            raise
         
         #TODO return permissions to current user
 
@@ -104,6 +114,9 @@ def main():
             #shutil.rmtree(args.workspace)
             # root permissions output, need to sudo rm
             call(['sudo', 'rm', '-rf', args.workspace])
+
+
+    return success
 
 def source_build_generate_dockerfile_template(args):
     workspace = args.workspace
@@ -239,7 +252,8 @@ def run_docker(args, docker_file_string, tag, mount_string):
     cmd = 'sudo docker run %s %s' % (mount_string, tag)
     print(cmd)
     try:
-        result = call(cmd.split()) == 0
+        return_code = call(cmd.split())
+        result = return_code == 0
     finally:
         shutil.rmtree(tmp_dir)
     return result
@@ -248,8 +262,11 @@ def run_docker(args, docker_file_string, tag, mount_string):
 if __name__ == '__main__':
     # global try
     try:
-        main()
-        print("docker finished cleanly.")
+        success = main()
+        if success:
+            print("docker finished cleanly.")
+        else:
+            print("docker finished with error code")
 
     # global catch
     except BuildException as ex:
