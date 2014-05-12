@@ -18,6 +18,7 @@ def run_devel_job(ros_distro, repo_list, version_list, workspace,
     repo_sourcespace = os.path.join(workspace, 'src')
     repo_path = os.path.join('/tmp', 'src')
     shutil.copytree(repo_path, repo_sourcespace)
+    print("Copy src from %s to %s" % (repo_path, repo_sourcespace))
     repo_buildspace = os.path.join(workspace, 'build')
     test_results_dir = os.path.join(workspace, 'test_results')
 
