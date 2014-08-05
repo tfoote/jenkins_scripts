@@ -241,7 +241,7 @@ def run_docker(args, docker_file_string, tag, mount_string):
     call(['cat', '%s/Dockerfile' % base_dir])
 
     if args.rebuild:
-        cmd = 'sudo docker build -no-cache -t %s %s' % (tag, base_dir)
+        cmd = 'sudo docker build --no-cache -t %s %s' % (tag, base_dir)
     else:
         cmd = 'sudo docker build -t %s %s' % (tag, base_dir)
     print(cmd)
