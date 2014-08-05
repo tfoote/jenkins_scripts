@@ -32,8 +32,11 @@ def run_devel_job(ros_distro, repo_list, version_list, workspace,
     os.makedirs(repo_buildspace)
     os.chdir(workspace)
 
+    print "pwd is:"
+    call("pwd", ros_env)
+
     print "Build catkin workspace"
-    call("catkin_make", ros_env)
+    call("catkin_make -C %s" % workspace, ros_env)
 
 
     if buildonly:
@@ -46,7 +49,10 @@ def run_devel_job(ros_distro, repo_list, version_list, workspace,
 
     # get the repositories test and run dependencies
     print "Build and run unit tests"
-    call("catkin_make run_tests -DCATKIN_TEST_RESULTS_DIR=%s" % (test_results_dir), ros_env)
+    try:
+        call("catkin_make run_tests -C %s -DCATKIN_TEST_RESULTS_DIR=%s" % (workspace, test_results_dir), ros_env)
+    except:
+        pass
     call("catkin_test_results %s" % test_results_dir, ros_env)
     print("Results available in %s " % workspace)
 
