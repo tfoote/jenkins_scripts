@@ -43,7 +43,7 @@ def main():
                         help='The architecture for the docher container')
     parser.add_argument("--rebuild", action="store_true", default=False,
                         help="Discard the Docker cache and rebuild the image")
-    parser.add_argument('--http_proxy', dest='http_proxy', default=None,
+    parser.add_argument('--http_proxy', dest='http_proxy', default=os.getenv('http_proxy'),
                         help='A http_proxy to pass into docker')
     parser.add_argument('ros_distro')
     parser.add_argument('-w', '--workspace', dest='workspace', default=None,
