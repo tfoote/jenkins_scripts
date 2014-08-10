@@ -23,6 +23,11 @@ DEVEL_TEMPLATES = {
     'ubuntudeb': [ 'template_bootstrap.em', 'template_devel_job.em'],
     }
 
+IMAGE_TEMPLATES = {
+    'ubuntudeb': [ 'template_bootstrap.em', 'template_image.em'],
+#    'ubuntupip': [ 'from_source/templates/pip_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
+#    'fedora': [ 'from_source/templates/fedora_bootstrap.em', 'from_source/templates/ubuntu_deb.em'],
+    }
 available_arches = ['amd64', 'i386']
 
 
@@ -64,6 +69,12 @@ def main():
                               help="Do not run unit tests just run the build.")
     devel_parser.set_defaults(func=devel_build_generate_dockerfile_template)
 
+    image_parser = subparsers.add_parser('image')
+    image_parser.add_argument('name', help="Name of docker image to generate")
+    image_parser.add_argument('packages', nargs='+', help="Packages to install into the image")
+    image_parser.add_argument('--template', default='ubuntudeb', choices=IMAGE_TEMPLATES)
+    image_parser.add_argument('--repository', default='', help="Repository for image tag.")
+    image_parser.set_defaults(func=image_build_generate_dockerfile_template)
     args = parser.parse_args()
 
     if not args.platform:
@@ -148,6 +159,39 @@ def source_build_generate_dockerfile_template(args):
     tag = '-'.join(['osrf', template_tag, args.os, args.platform, args.ros_distro, args.metapackage])
 
     mount_string = '-v %(workspace)s:%(workspace)s:rw' % d
+
+    return res, tag, mount_string
+
+def image_build_generate_dockerfile_template(args):
+    packages = args.packages
+    ros_distro = args.ros_distro
+    template_tag = args.template
+
+
+    timestamp = datetime.datetime.utcnow().strftime('%Y%m%d')
+
+    #Generation substitution dictionary
+    d = {
+        'arch': args.arch,
+        'http_proxy': None,
+        'maintainer_email': MAINTAINER_EMAIL,
+        'maintainer_name': MAINTAINER_NAME,
+        'packages': packages,
+        'operating_system': args.os,
+        'platform': args.platform,
+        'ros_distro': ros_distro,
+        'timestamp': timestamp,
+    }
+
+    res = substitute_templates(IMAGE_TEMPLATES[template_tag], d)
+    
+    # build and tag the image
+    tag = '-'.join([args.platform, 'ros', args.ros_distro]) + ':' + args.name
+    # If we're targeting a repository prepend it to the tag string
+    if args.repository:
+        tag = '/'.join([args.repository, tag])
+
+    mount_string = ''
 
     return res, tag, mount_string
 
